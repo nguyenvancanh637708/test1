@@ -43,6 +43,8 @@ function handle_checkout_payment() {
     foreach ($products as $product) {
         $sim_id = sanitize_text_field($product['sim_id']);
         $goicuoc_id = sanitize_text_field($product['goicuoc_id']);
+        $chuky = sanitize_text_field($product['chuky']);
+
         
         // Lấy thông tin sản phẩm từ DB
         $sim_product = wc_get_product($sim_id);
@@ -60,7 +62,7 @@ function handle_checkout_payment() {
                 'goicuoc_id' => $goicuoc_id,
                 'goicuoc_price' => $goicuoc_product->get_price(),
                 'sim_type' => $sim_type,
-                'package_cycle' => 1, 
+                'package_cycle' => $chuky, 
                 'sim_priceShip' => 0,
                 'total_price' => $sim_product->get_price() + $goicuoc_product->get_price(),
                 'sales_channel' => 'website',

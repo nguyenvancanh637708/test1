@@ -134,6 +134,8 @@ get_header();
                                 if ( isset($items[$i]) && isset($items[$i + 1]) ) {
                                     $product1 = $items[$i]['data'];
                                     $product2 = $items[$i + 1]['data'];
+                                    
+
 
                                      // Kiểm tra xem sản phẩm có phải là biến thể không
                                     $parent_id1 = $product1->get_type() === 'variation' ? $product1->get_parent_id() : $product1->get_id();
@@ -165,7 +167,16 @@ get_header();
                                     } elseif ( in_array( 'Gói cước', $product2_categories ) ) {
                                         $goicuoc = $product2;
                                     }
-                            
+
+                                    // Lấy chu kỳ
+                                    $chu_ky = 1;
+                                    if (isset($goicuoc->get_attributes()['pa_chon-chu-ky'])) {
+                                        $chu_ky_full = $goicuoc->get_attributes()['pa_chon-chu-ky'];
+                                        $chu_ky_parts = explode('-thang', $chu_ky_full);
+                                        $chu_ky = $chu_ky_parts[0]; // Lấy phần trước "-thang"
+                                    }
+
+
                                     // In ra thông tin sản phẩm nếu đã xác định được
                                     if ( $sim && $goicuoc ) {
                                         echo '
@@ -187,8 +198,10 @@ get_header();
                                                 </div>
                                                 <div>
                                                     <span class="sub-title">Chu kỳ</span>
-                                                    <span class="name-product ">1 tháng</span>
+                                                    <span class="name-product ">' . $chu_ky . ' tháng</span>
                                                     <span class="price">' . wc_price($goicuoc->get_price()) . '</span>
+                                                    <input type="hidden" class="chu_ky_goi_cuoc" value="' . esc_attr($chu_ky) . '"> 
+
                                                 </div>
                                             </div>
                                         ';
@@ -257,10 +270,12 @@ get_header();
         $('.combo-item').each(function() {
             let sim_id = $(this).find('.sim-id').val();
             let goicuoc_id = $(this).find('.goicuoc-id').val();
+            let chu_ky = $(this).find('.chu_ky_goi_cuoc').val();
 
             products.push({
                 sim_id: sim_id,
-                goicuoc_id: goicuoc_id
+                goicuoc_id: goicuoc_id,
+                chuky: chu_ky,
             });
         });
 
@@ -300,6 +315,7 @@ get_header();
             payment_method: paymentMethod
         };
 
+        // console.log(formData)
         $.ajax({
             url: "<?php echo admin_url('admin-post.php'); ?>", 
             method: "POST",
