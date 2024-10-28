@@ -1,0 +1,148 @@
+:root{
+    --color-primary: #161F42;
+    --Neutral-Color---White: #fff;
+    --Greys-Grey-300: #E3E5ED;
+    --White-White: #fff;
+    --Greys-Grey-700: #767B92;
+    --Greys-Grey-800: #252731;
+    --Colors-MobifoneGo-Orange: #0078D8;
+}
+body{
+    background: #F0F6FF;
+}
+
+.page-thankyou {
+    width: 100%;
+    max-width: 1250px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 0px;
+}
+
+.page-thankyou .btn-custom{
+    width: 100%;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 1px solid var(--Colors-MobifoneGo-Orange, #0078D8);
+    color: var(--Colors-MobifoneGo-Orange, #0078D8);
+    padding: 10px 20px;
+    border-radius: 8px;
+    display: flex; 
+    justify-content: center;
+}
+
+.page-thankyou .btn-custom.btn-primary{
+    background-color: var(--Colors-MobifoneGo-Orange, #0078D8);
+    color: var(--White-White, #FFF);
+}
+
+.page-thankyou .row-flex .value.tag-content{
+    display: flex;
+    height: 20px;
+    padding: 0.5px 12px;
+    align-items: center;
+    gap: 10px;
+    border-radius: 4px;
+    background: var(--Status-Green, #39B44A);
+    color: var(--Colors-White, #FFF);
+    font-size: 12px;
+
+}
+.page-thankyou .row-flex .value.name-item{
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 700;
+    color: var(--Colors-MobifoneGo-Orange, #0078D8);
+}
+.page-thankyou .row-flex .value.money{
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 700;
+    color: var(--Greys-Grey-800, #252731);
+}
+.page-thankyou .row-flex .value.payment-method{
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+
+.page-thankyou .content{
+    width: 771px;
+    position: relative;
+    border: 1px solid ;
+    border: 1px solid var(--Greys-Grey-300, #E3E5ED);
+    background: var(--White-White, #FFF);
+    border-radius: 8px;
+
+}
+.page-thankyou .ct-layer{
+    display: flex;
+    justify-content: space-between;
+    z-index: 10;
+    position: absolute;
+    top: 0%;
+    width: 100%;
+}
+.page-thankyou .ct-head{
+    /* background: linear-gradient(180deg, #148DD7 -116.64%, #1BA8FF 100%); */
+    background: linear-gradient(152deg, #0BBEE5 -0.32%, #3856F3 51.82%, #277DEE 100%);
+    width: 100%;
+    height: 155px;
+    border-radius: 8px 8px 0 0;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    position: relative;
+}
+.page-thankyou .title{
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    color: var(--Neutral-Color---White, #FFF);
+    text-align: center;
+}
+.page-thankyou .sub-title{
+    color: var(--Neutral-Color---White, #FFF);
+    text-align: center;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+}
+.page-thankyou .ct-body{
+    padding: 32px 40px 24px 40px;
+    gap: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-width: 480px;
+}
+.page-thankyou .row-flex{
+    display: flex;
+    justify-content: space-between;
+    width: 480px;
+    gap: 12px;
+}
+.page-thankyou .label{
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    color: var(--Greys-Grey-700, #767B92);
+}
+.page-thankyou .value{
+    color: var(--Greys-Grey-800, #252731);
+    text-align: right;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+}
