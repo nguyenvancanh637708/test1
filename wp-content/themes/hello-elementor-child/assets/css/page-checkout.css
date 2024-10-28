@@ -244,3 +244,10 @@ body{
     border-color: #0078D8;
     color: #fff;
 }
+#btn-buy-now.disabled {
+    background-color: #ccc; 
+    cursor: not-allowed; 
+    opacity: 0.65; 
+    pointer-events: none; 
+}
+
