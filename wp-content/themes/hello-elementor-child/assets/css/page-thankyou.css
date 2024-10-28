@@ -76,7 +76,8 @@ body{
 
 
 .page-thankyou .content{
-    width: 771px;
+    max-width: 771px;
+    width: 100%;
     position: relative;
     border: 1px solid ;
     border: 1px solid var(--Greys-Grey-300, #E3E5ED);
@@ -91,6 +92,9 @@ body{
     position: absolute;
     top: 0%;
     width: 100%;
+}
+.page-thankyou .ct-layer img{
+    max-width: 50%;
 }
 .page-thankyou .ct-head{
     /* background: linear-gradient(180deg, #148DD7 -116.64%, #1BA8FF 100%); */
@@ -125,12 +129,12 @@ body{
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-width: 480px;
 }
 .page-thankyou .row-flex{
     display: flex;
     justify-content: space-between;
-    width: 480px;
+    max-width: 480px;
+    width: 100%;
     gap: 12px;
 }
 .page-thankyou .label{
