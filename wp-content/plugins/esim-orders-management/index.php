@@ -20,14 +20,29 @@ function my_theme_scripts() {
         wp_deregister_script('jquery');
         wp_enqueue_script('jquery', 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js', array(), null, true);
     }
-    wp_enqueue_style( 'order', ORDER_URI . 'assets/css/index.css' );
+  // Thêm CSS và JS của Select2
+  wp_enqueue_style('select2-css', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css');
+  wp_enqueue_script('select2-js', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js', array('jquery'), null, true);
+
+    wp_enqueue_style( 'order', ORDER_URI . 'assets/css/index.css');
     wp_enqueue_script( 'order', ORDER_URI . 'assets/js/index.js', array( 'jquery' ), ORDER_VERSION, true );
     wp_localize_script( 'order', 'order_obj', array(
         'ajax_url'   => admin_url( 'admin-ajax.php' ),
         'order_nonce' => wp_create_nonce( 'order-nonce' )
     ));
+     // Khởi tạo Select2 cho #sales_channel
+     wp_add_inline_script('select2-js', "
+     jQuery(document).ready(function($) {
+         $('#sim_type').select2({
+             placeholder: 'Chọn loại sim',
+             allowClear: true
+         });
+     });
+ ");
+    
 }
 add_action('wp_enqueue_scripts', 'my_theme_scripts');
+add_action('admin_enqueue_scripts', 'my_theme_scripts'); 
 
 function my_custom_menu_page() {
     add_menu_page(
@@ -39,9 +54,23 @@ function my_custom_menu_page() {
         'dashicons-admin-generic',
         60
     );
+    add_submenu_page(
+        null, // Không hiển thị trong menu chính
+        'Edit Order', // Tiêu đề trang
+        'Edit Order', // Tiêu đề menu
+        'manage_options', // Quyền truy cập
+        'edit_order_info', // Slug của trang
+        'update_customer_order_info_html' // Hàm hiển thị trang
+    );
 }
 add_action( 'admin_menu', 'my_custom_menu_page' );
 
+// Xử lý cập nhật thông tin danh sách khách hàng đặt hàng
+// Import file edit-order.php
+require_once plugin_dir_path(__FILE__) . 'edit-order.php';
+
+
+//Hiển thị danh sách khách hàng đặt hàng
 function list_custom_order_html() {
     if ( ! current_user_can( 'manage_options' ) ) {
         return;
@@ -93,20 +122,24 @@ function list_custom_order_html() {
                     <span> đến ngày </span><input type="date" name="to_date" value="<?php echo esc_attr($to_date); ?>">
                 </div>
                 <div class="alignleft actions">
-                    <select name="sales_channel">
+                <select name="sim_type[]" id="sim_type" multiple>
+                        <option value="">--Tất cả--</option>
+                        <option <?php selected($sales_channel, 'Esimdata'); ?> value="Esimdata">Esimdata</option>
+                        <option <?php selected($sales_channel, 'Landing'); ?> value="Landing">Landing</option>
+                    </select>
+                    <select name="sales_channel" id="sales_channel">
                         <option value="">Kênh bán</option>
                         <option <?php selected($sales_channel, 'Esimdata'); ?> value="Esimdata">Esimdata</option>
                         <option <?php selected($sales_channel, 'Landing'); ?> value="Landing">Landing</option>
                     </select>
                     <input type="text" name="customer_phone" placeholder="Số điện thoại" value="<?php echo esc_attr($customer_phone); ?>">
                     <input type="text" name="user_id" placeholder="Nhân viên gọi" value="<?php echo esc_attr($user_id); ?>">
-                    <input type="submit" name="filter_action" id="order-query-submit" class="button" value="Lọc">
+                    <input type="submit" name="filter_action" id="order-query-submit" class="button" value="Tìm kiếm">
                 </div>
             </div>
             <table class="wp-list-table widefat fixed striped table-view-list orders wc-orders-list-table wc-orders-list-table-shop_order">
                 <thead>
                     <tr>
-                        <th class="manage-column column-cb check-column"><input id="cb-select-all-1" type="checkbox"></th>
                         <th>Thời gian đặt</th>
                         <th>Họ tên KH</th>
                         <th>Số điện thoại</th>
@@ -125,9 +158,9 @@ function list_custom_order_html() {
                 <tbody id="the-list" data-wp-lists="list:order">
                     <?php
                     if ($orders) {
-                        foreach ($orders as $order) { ?>
+                        foreach ($orders as $order) { 
+                            $edit_url = admin_url('admin.php?page=edit_order_info&order_id=' . $order->id);?>
                             <tr>
-                                <td><input type="checkbox"></td>
                                 <td><?php echo esc_html($order->created_date); ?></td>
                                 <td><?php echo esc_html($order->customer_name); ?></td>
                                 <td><?php echo esc_html($order->customer_phone); ?></td>
@@ -137,17 +170,25 @@ function list_custom_order_html() {
                                 <td><?php echo number_format($order->goicuoc_price, 0, ',', '.'); ?></td>
                                 <td><strong><?php echo number_format($order->total_price, 0, ',', '.'); ?></strong></td>
                                 <td><?php echo esc_html($order->sales_channel); ?></td>
-                                <td><?php echo esc_html($order->user_id); ?></td>
+                                <td><?php echo get_user_by('ID', $order->user_id)->display_name;?></td>
                                 <td><?php echo esc_html($order->note); ?></td>
-                                <td><?php echo esc_html($order->status); ?></td>
+                                <td><?php 
+                                if($order->status==0){
+                                    echo "--";
+                                }else if($order->status==1){
+                                    echo "<p style='color:green'>Thành công</p>";
+                                }else{
+                                    echo "<p style='color:red'>Thất bại</p>";
+                                }
+                                ?></td>
                                 <td>
-                                    <button type="button" class="button">Xem</button>
-                                    <button type="button" class="button">Sửa</button>
+                                    <a href="<?php echo $edit_url?>" class="button">Sửa</a>
+                                  
                                 </td>
                             </tr>
                         <?php } 
                     } else { ?>
-                        <tr><td colspan="13">Không tìm thấy đơn hàng nào.</td></tr>
+                        <tr><td colspan="13">Không tìm thấy đơn hàng.</td></tr>
                     <?php } ?>
                 </tbody>
             </table>
