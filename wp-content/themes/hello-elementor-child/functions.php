@@ -23,17 +23,24 @@ function handle_checkout_payment() {
         wp_die();
     }
 
-    $products = isset($_POST['products']) ? $_POST['products'] : [];
     global $wpdb;
 
-    $province = isset($_POST['province']) ? sanitize_text_field($_POST['province']) : '';
-    $district = isset($_POST['district']) ? sanitize_text_field($_POST['district']) : '';
-    $ward = isset($_POST['ward']) ? sanitize_text_field($_POST['ward']) : '';
-    $detailed_address = isset($_POST['detailed_address']) ? sanitize_text_field($_POST['detailed_address']) : '';
-    $sim_type = isset($_POST['sim_type']) ? sanitize_text_field($_POST['sim_type']) : '';
-    $payment_method = isset($_POST['payment_method']) ? sanitize_text_field($_POST['payment_method']) : '';
-    $customer_name = isset($_POST['customer_name']) ? sanitize_text_field($_POST['customer_name']) : '';
-    $customer_phone = isset($_POST['customer_phone']) ? sanitize_text_field($_POST['customer_phone']) : '';
+    $products = isset($_POST['products']) ? $_POST['products'] : [];
+    $province = sanitize_text_field($_POST['province'] ?? '');
+    $district = sanitize_text_field($_POST['district'] ?? '');
+    $ward = sanitize_text_field($_POST['ward'] ?? '');
+    $detailed_address = sanitize_text_field($_POST['detailed_address'] ?? '');
+    $sim_type = sanitize_text_field($_POST['sim_type'] ?? '');
+    $payment_method = sanitize_text_field($_POST['payment_method'] ?? '');
+    $customer_name = sanitize_text_field($_POST['customer_name'] ?? '');
+    $customer_phone = sanitize_text_field($_POST['customer_phone'] ?? '');
+    $notes = sanitize_text_field($_POST['notes'] ?? '');
+
+    // Validate phone number format (simple regex example)
+    if (!preg_match('/^[0-9]{10,15}$/', $customer_phone)) {
+        wp_send_json_error('Invalid phone number format.');
+        wp_die();
+    }
 
     $table_name = 'wp_esim_orders';
     $order_inserted = false;
@@ -42,15 +49,15 @@ function handle_checkout_payment() {
     $wpdb->query('START TRANSACTION');
     try {
         foreach ($products as $product) {
-            $sim_id = sanitize_text_field($product['sim_id']);
-            $goicuoc_id = sanitize_text_field($product['goicuoc_id']);
-            $chuky = sanitize_text_field($product['chuky']);
+            $sim_id = sanitize_text_field($product['sim_id'] ?? '');
+            $goicuoc_id = sanitize_text_field($product['goicuoc_id'] ?? '');
+            $chuky = sanitize_text_field($product['chuky'] ?? '');
             
             $sim_product = wc_get_product($sim_id);
             $goicuoc_product = wc_get_product($goicuoc_id);
 
             if ($sim_product && $goicuoc_product) {
-                // Kiểm tra xem `phone_number` đã tồn tại chưa với status != -1 // thất bại
+                // Check if `phone_number` already exists with status != -1
                 $phone_number = $sim_product->get_name();
                 $exists = $wpdb->get_var($wpdb->prepare(
                     "SELECT COUNT(*) FROM $table_name WHERE phone_number = %s AND status != %d",
@@ -63,7 +70,7 @@ function handle_checkout_payment() {
                     wp_die();
                 }
 
-                // Dữ liệu cần lưu cho mỗi cặp sản phẩm
+                // Prepare data to insert
                 $data = [
                     'customer_name' => $customer_name,
                     'customer_phone' => $customer_phone,
@@ -80,8 +87,10 @@ function handle_checkout_payment() {
                     'total_price' => $sim_product->get_price() + $goicuoc_product->get_price() + $feeShip,
                     'sales_channel' => 'Esimdata',
                     'status' => 0,
+                    'note' => $notes,
                 ];
 
+                // Insert data
                 $result = $wpdb->insert($table_name, $data);
 
                 if ($result === false) {
@@ -92,13 +101,16 @@ function handle_checkout_payment() {
             }
         }
 
+        // Commit transaction if all inserts are successful
         $wpdb->query('COMMIT');
         wp_send_json_success('Insert successful.');
     } catch (Exception $e) {
+        // Rollback transaction in case of error
         $wpdb->query('ROLLBACK');
         wp_send_json_error('Transaction failed: ' . $e->getMessage());
     }
     wp_die();
 }
+
 
 

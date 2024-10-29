@@ -1,0 +1,698 @@
+.rank-math-breadcrumb {
+    margin: 16px 0px 0px 0px;
+		color: #4D4D4D;
+    font-family: "Be Vietnam Pro", Sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+		font-weight:500;
+}
+
+.rank-math-breadcrumb a {
+    color: #4D4D4D;
+}
+
+.rank-math-breadcrumb span {
+    color: #4D4D4D;
+}
+
+/* form comment */
+.reply-ctn{
+	padding:0px 40px 40px;
+}
+/*trang thanh toán*/
+.product-filter {
+    overflow-x: auto; /* Cho phép cuộn ngang */
+    white-space: nowrap; /* Không cho phép ngắt dòng */
+}
+
+.filter-buttons {
+    display: flex; /* Sử dụng flexbox để căn chỉnh các nút */
+}
+
+.filter-button {
+    display: inline-block; /* Hiển thị các nút theo chiều ngang */
+    min-width: 100px; /* Chiều rộng tối thiểu cho nút */
+    transition: transform 0.3s ease; /* Hiệu ứng khi hover */
+}
+
+.filter-button:hover {
+    transform: scale(1.05); /* Phóng to nút khi hover */
+}
+
+
+/*test css*/
+/*scoll network*/
+.filter-buttons {
+    display: flex; /* Sử dụng flexbox */
+    overflow-x: auto; /* Cho phép cuộn ngang */
+}
+
+@media (max-width: 767px) {
+    .filter-buttons {
+        justify-content: flex-start; /* Căn trái cho màn hình nhỏ */
+        padding-left: 0; /* Không có padding bên trái */
+    }
+
+    .filter-button {
+        flex: 0 0 auto; /* Giữ kích thước ban đầu cho các nút */
+        margin-right: 10px; /* Khoảng cách giữa các nút */
+    }
+}
+
+@media (min-width: 768px) {
+    .filter-buttons {
+        justify-content: center; /* Căn giữa cho màn hình lớn */
+    }
+}
+
+
+
+/* General layout for product list */
+@media only screen and (min-width: 1285px) {
+  .list.container{
+	width:65%;
+}
+}
+
+@media only screen and (max-width: 768px) {
+  .list.container{
+	width:90%;
+}
+}
+
+@media only screen and (max-width: 1024px) {
+  .list.container{
+	width:100%;
+}
+}
+
+.btn-secondary{
+	--bs-btn-color: #0d6efd;
+    --bs-btn-bg: #fff;
+    --bs-btn-border-color: #0d6efd;
+    --bs-btn-hover-color: #0d6efd;
+    --bs-btn-hover-bg: aliceblue;
+    --bs-btn-hover-border-color: #0d6efd;
+    --bs-btn-focus-shadow-rgb: 130, 138, 145;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #565e64;
+    --bs-btn-active-border-color: #51585e;
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: #fff;
+    --bs-btn-disabled-bg: #6c757d;
+    --bs-btn-disabled-border-color: #6c757d;
+}
+.item {
+    width: calc(33.333% - 20px); /* 3 products per row */
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.item:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.thumnail a img {
+    border-radius: 10px;
+    max-width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+/* Product content styles */
+.content {
+    margin-top: 15px;
+}
+
+.productName a {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    text-decoration: none;
+}
+
+.productName a:hover {
+    color: #007bff; /* Adjust to match your site theme */
+}
+
+.ratting {
+    margin: 10px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.ratting span {
+    display: block;
+}
+
+.price {
+    font-size: 18px;
+    color: red;
+    font-weight: bold;
+}
+
+/* Buttons */
+.button {
+    display: inline-block;
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    margin: 10px 5px;
+    border-radius: 25px;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.button:hover {
+    background-color: #0056b3;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .item {
+        width: calc(50% - 10px); /* 2 products per row on tablet/mobile */
+    }
+}
+
+@media (max-width: 480px) {
+    .item {
+        width: 100%; /* 1 product per row on smaller screens */
+    }
+}
+.product-filter {
+    margin: 20px auto; /* Căn giữa theo chiều dọc */
+    text-align: center;
+    white-space: nowrap; /* Đảm bảo các nút không xuống dòng */
+    overflow-x: hidden; /* Ẩn thanh cuộn ngang */
+    width: 100%;
+}
+
+.filter-buttons {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    overflow-x: auto; /* Cuộn ngang cho các nút */
+    scroll-behavior: smooth; /* Hiệu ứng cuộn mượt */
+    -webkit-overflow-scrolling: touch; /* Cho phép cuộn trên thiết bị cảm ứng */
+}
+
+.filter-buttons::-webkit-scrollbar {
+    display: none; /* Ẩn thanh cuộn ngang */
+}
+
+.filter-button {
+    display: inline-flex;
+    align-items: center; /* Căn giữa hình ảnh theo chiều dọc */
+    justify-content: center; /* Căn giữa hình ảnh theo chiều ngang */
+    margin: 5px;
+    border: 1px solid #ddd;
+    border-radius: 99px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+    width: 120px;
+    height: 40px;
+    background-color: #fff;
+}
+
+.filter-button:hover {
+    border-color: #0078D8;
+}
+
+.filter-button:active {
+    border-color: #0078D8;
+}
+
+.filter-button img {
+    max-width: 80px;
+    max-height: 30px;
+    object-fit: contain; 
+}
+
+/*css trang chọn số */
+/*icon hình thức*/
+.sim-selection {
+  display: flex;
+  align-items: center;
+  /* Đảm bảo các phần tử nằm trên cùng một hàng */
+}
+
+.sim-selection label {
+  margin-right: 10px;
+  /* Khoảng cách giữa checkbox và icon */
+}
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+}
+
+.info-icon {
+  font-size: 15px;
+  /* Kích thước icon */
+  color: #161F42;
+  cursor: pointer;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -100px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip-container:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+.title-page h3{
+text-align: center;
+    margin-top: 20px;
+    font-weight: 700;
+    font-size: 36px;
+    line-height: 42px;
+		margin-bottom:20px;
+}
+
+.product-filter-container {
+    margin-bottom: 20px;
+}
+
+.product-filter-container form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.product-filter-container select {
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+
+.product-filter-container .button {
+    background-color: #0078D8;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.product-filter-container .button:hover {
+    background-color: #0056b3;
+}
+
+/* test 2 */
+.product-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 16px;
+    text-align: left;
+}
+
+.product-table th, .product-table td {
+    padding: 12px;
+    border: 1px solid #ddd;
+}
+
+.product-table th {
+    background-color: #f4f4f4;
+}
+
+.product-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.product-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.button.add-to-cart {
+    background-color: #0078D8;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.button.add-to-cart:hover {
+    background-color: #005a9c;
+}
+
+/* css Page Select Number */
+.product-list-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: 20px 0;
+}
+
+.product-list-header,
+.product-list-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+		align-items: center;
+		padding: 5px;
+
+}
+
+.product-list-header {
+    background-color: #f8f8f8;
+    font-weight: bold;
+		border-bottom:2px solid #336AFF;
+}
+.product-list-row {
+			border-bottom:1px solid #ddd;
+}
+.product-item {
+    flex: none;
+    padding: 10px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.product-item.stt {
+    flex: 0 0 50px;
+    /* Chiều rộng cho cột STT */
+}
+
+.product-item.action {
+    flex: 0 0 150px;
+    /* Chiều rộng cho cột Hành động */
+}
+
+.chon-so-button {
+    background-color: #ffffff;
+    color: #0078D8;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    display: inline-block;
+		border: 1px solid #0078d8;
+}
+
+.chon-so-button:hover {
+    background-color: #0056A3;
+		color: #ffffff;
+}
+
+@media (max-width: 768px) {
+    .product-list-header,
+    .product-list-row {
+        flex-direction: column;
+        text-align: left;
+    }
+    .product-item {
+        padding: 8px 0;
+        text-align: left;
+    }
+    .product-item.stt,
+    .product-item.action {
+        text-align: center;
+    }
+    .product-item.so-dien-thoai,
+    .product-item.nha-mang,
+    .product-item.gia-sim {
+        display: flex;
+        justify-content: space-between;
+    }
+}
+/* filter fast */
+.filter-container-fast {
+    margin-bottom: 20px;
+}
+
+.filter-container-fast form {
+    display: flex;
+    align-items: center; /* Đặt các phần tử nằm trên cùng một hàng */
+    gap: 10px; /* Khoảng cách giữa các phần tử trong form */
+}
+
+.filter-container-fast label {
+    font-weight: bold;
+    margin-right: 10px; /* Khoảng cách giữa nhãn và select */
+}
+
+.filter-container-fast select {
+    padding: 10px 15px;
+    width: auto; /* Đặt độ rộng tự động theo nội dung */
+    min-width: 150px; /* Đặt độ rộng tối thiểu để thanh select không quá nhỏ */
+	font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.filter-container-fast button {
+    padding: 5px 10px;
+    background-color: #0078D8;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+	  margin-left:-80px
+}
+
+.filter-container-fast button:hover {
+    background-color: #0056A3;
+}
+
+/* Responsive design for mobile screens */
+@media (max-width: 768px) {
+    .filter-container-fast form {
+        flex-direction: column; /* Xếp các phần tử thành cột trên màn hình nhỏ */
+        align-items: flex-start; /* Căn trái các phần tử trong form */
+    }
+
+    .filter-container-fast label {
+        margin-bottom: 5px; /* Khoảng cách giữa nhãn và select */
+    }
+
+    .filter-container-fast select, .filter-container-fast button {
+        width: 100%; /* Đặt thanh select và nút button full width trên màn hình nhỏ */
+        max-width: 300px; /* Đặt độ rộng tối đa để không quá rộng */
+    }
+}
+/* filter network */
+#phone_search{
+    border: 1px solid #E3E5ED;
+    border-radius: 8px;
+    box-shadow: none;
+    font-size: 24px;
+    background-color: #fff;
+    font-weight: 500;
+    color: #B7BAC9;
+}
+
+.filter-container-normal {
+    margin-bottom: 10px;
+}
+
+.filter-container-normal form {
+    display: flex;
+    align-items: center; /* Đặt các phần tử nằm trên cùng một hàng */
+    gap: 10px; /* Khoảng cách giữa các phần tử trong form */
+	padding: 0px 20px;
+    background: linear-gradient(90deg, rgba(210, 248, 226, 1) 0%, rgba(222, 236, 251, 1) 100%);
+    border-radius: 12px;
+    height: 128px;
+}
+
+.filter-container-normal label {
+    font-weight: bold;
+    margin-right: 10px; /* Khoảng cách giữa nhãn và select */
+}
+
+.filter-container-normal select {
+    width: auto;
+    min-width: 160px; 
+	  width: 20%;
+    background-color: #f7faff;
+    border: 1px solid #E3E5ED;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.filter-container-normal button {
+
+    background-color: #0078D8;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+
+}
+
+.filter-container-normal button:hover {
+    background-color: #0056A3;
+}
+
+/* Responsive design for mobile screens */
+@media (max-width: 768px) {
+    .filter-container-normal form {
+        flex-direction: column; /* Xếp các phần tử thành cột trên màn hình nhỏ */
+        align-items: flex-start; /* Căn trái các phần tử trong form */
+    }
+
+    .filter-container-normal label {
+        margin-bottom: 5px; /* Khoảng cách giữa nhãn và select */
+    }
+
+    .filter-container-normal select, .filter-container-normal button {
+        width: 100%; /* Đặt thanh select và nút button full width trên màn hình nhỏ */
+        max-width: 300px; /* Đặt độ rộng tối đa để không quá rộng */
+    }
+}
+
+
+.input-container {
+    position: relative;
+    width: 100%;
+  }
+
+  .input-container input {
+    width: 100%;
+    padding-right: 90px; /* Khoảng cách để chứa nút */
+    box-sizing: border-box;
+  }
+
+  .input-container button {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    padding: 0 20px;
+    cursor: pointer;
+    border-radius: 0 5px 5px 0; /* Làm tròn góc phải của nút */
+  }
+
+  .input-container button:hover {
+    background-color: #0056b3;
+  }
+
+.product-list-container{
+	padding: 0px 50px;
+}
+.product-list-header, .product-list-row{
+
+}
+.filter-container-fast form{
+	padding:0px 50px;
+}
+.instruct p{
+	margin:0;
+	color:#252731;
+	font-size:16px;
+	line-height:24px;
+	
+}
+.instruct{
+	margin-bottom:50px;
+}
+.product-list-row .gia-sim{
+	color:#336AFF;
+	font-weight:600;
+	font-size:18px;
+	line-height:30px;
+}
+/*css logo network */
+.network-logo-container {
+	width: 50px;
+  height: 50px;
+  border-radius: 50%; 
+  padding: 5px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  display: flex; 
+	align-items: center; 
+  justify-content: center;
+  box-sizing: border-box;
+}
+        
+.network-logo {
+  width: 100%;
+  object-fit: cover;
+}
+.network-logo[src*="saymee.png"] {
+  width: 100%;
+  object-fit: cover;
+	margin:10px
+}
+
+.chon-so{
+	color: #0078D8;
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 30px;
+	line-height:30px;
+}
+
+.sdt{
+  color: #161F42;
+  font-weight: 600;
+  line-height: 28px;
+  font-size: 20px;
+}
+
+/*reponsive layout*/
+/* Hide mobile layout on larger screens (e.g., desktop) */
+.mobile-layout {
+    display: none;
+}
+
+.desktop-layout {
+    display: block;
+}
+
+/* Hide desktop layout on smaller screens (e.g., mobile) */
+@media (max-width: 768px) {
+    .mobile-layout {
+        display: block;
+    }
+
+    .desktop-layout {
+        display: none;
+    }
+	#phone_search{
+		font-size:18px;
+	}
+}
+.page-mobile{
+	  text-align: center;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 32px;
+}
+
+.fw-bold{
+	margin:0;
+}
+
+
+
+

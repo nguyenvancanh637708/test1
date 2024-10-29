@@ -6,6 +6,7 @@ get_header();
 echo '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">';
 echo '<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">';
 
+
 // Lấy danh mục sản phẩm 
 $sim_category_slug = 'sim';
 
@@ -175,6 +176,8 @@ if (!empty($excluded_product_ids)) {
 
 $query = new WP_Query($args);
 ?>
+<link rel="stylesheet" href="<?php echo get_stylesheet_directory_uri(); ?>/assets/css/page-chonso.css" type="text/css">
+
 <div class="desktop-layout">
     <!-- Breakcrumd -->
     <div class="container">
