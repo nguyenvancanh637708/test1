@@ -33,8 +33,7 @@ function my_theme_scripts() {
      // Khởi tạo Select2 cho #sales_channel
      wp_add_inline_script('select2-js', "
      jQuery(document).ready(function($) {
-         $('#sim_type').select2({
-             placeholder: 'Chọn loại sim',
+         $('#goicuoc_id').select2({
              allowClear: true
          });
      });
@@ -78,14 +77,28 @@ function list_custom_order_html() {
 
     global $wpdb;
     $table_name = 'wp_esim_orders';
+    $args_goi_cuoc = [
+        'post_type'      => ['product', 'product_variation'],
+        'posts_per_page' => -1,
+        'tax_query'      => [
+            [
+                'taxonomy' => 'product_cat',
+                'field'    => 'slug',
+                'terms'    => 'goi-cuoc', // Danh mục "Gói cước"
+            ],
+        ],
+        
+    ];
+    $listGoiCuoc = new WP_Query($args_goi_cuoc);
 
+    // var_dump($listGoiCuoc);
     $from_date = isset($_GET['from_date']) && !empty($_GET['from_date']) ? sanitize_text_field($_GET['from_date']) : date('Y-m-d', strtotime('-7 days'));
     $to_date = isset($_GET['to_date']) && !empty($_GET['to_date']) ? sanitize_text_field($_GET['to_date']) : date('Y-m-d');
     
     $sales_channel = isset($_GET['sales_channel']) ? sanitize_text_field($_GET['sales_channel']) : '';
     $customer_phone = isset($_GET['customer_phone']) ? sanitize_text_field($_GET['customer_phone']) : '';
     $user_id = isset($_GET['user_id']) ? sanitize_text_field($_GET['user_id']) : '';
-
+    $goicuoc_id = isset($_GET['goicuoc_id']) ? $_GET['goicuoc_id'] : array();
     // Xây dựng câu truy vấn dựa trên filter
     $query = "SELECT * FROM $table_name WHERE 1=1";
 
@@ -106,6 +119,25 @@ function list_custom_order_html() {
     if ($user_id) {
         $query .= " AND user_id LIKE '%$user_id%'";
     }
+    if (!empty($goicuoc_id)) {
+        $all_ids = [];
+    
+        // Duyệt qua từng ID sản phẩm cha
+        foreach ($goicuoc_id as $parent_id) {
+            $all_ids[] = intval($parent_id); // Thêm ID sản phẩm cha vào mảng
+    
+            // Lấy tất cả các biến thể của sản phẩm cha
+            $product = wc_get_product($parent_id);
+            if ($product && $product->is_type('variable')) {
+                $variation_ids = $product->get_children(); // Lấy danh sách ID biến thể
+                $all_ids = array_merge($all_ids, array_map('intval', $variation_ids)); // Thêm ID biến thể vào mảng
+            }
+        }
+    
+        // Chuyển đổi mảng thành chuỗi để sử dụng trong truy vấn SQL
+        $goicuoc_ids = implode(',', $all_ids);
+        $query .= " AND goicuoc_id IN ($goicuoc_ids)";
+    }
 
     $orders = $wpdb->get_results($query);
     ?>
@@ -122,10 +154,16 @@ function list_custom_order_html() {
                     <span> đến ngày </span><input type="date" name="to_date" value="<?php echo esc_attr($to_date); ?>">
                 </div>
                 <div class="alignleft actions">
-                <select name="sim_type[]" id="sim_type" multiple>
+                <select name="goicuoc_id[]" id="goicuoc_id" multiple >
                         <option value="">--Tất cả--</option>
-                        <option <?php selected($sales_channel, 'Esimdata'); ?> value="Esimdata">Esimdata</option>
-                        <option <?php selected($sales_channel, 'Landing'); ?> value="Landing">Landing</option>
+                       <?php while ($listGoiCuoc->have_posts()) : $listGoiCuoc->the_post();
+                       ?>
+                       
+                       
+                       <option value="<?php echo get_the_ID(); ?>" <?php echo in_array(get_the_ID(),$goicuoc_id) ? 'selected' : ''; ?>>
+                            <?php echo esc_html(get_the_title()); ?>
+                        </option>
+                       <?php endwhile?>
                     </select>
                     <select name="sales_channel" id="sales_channel">
                         <option value="">Kênh bán</option>
