@@ -1,58 +1,149 @@
-#package-popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: #fff;
-    padding: 20px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-    z-index: 9999;
-}
-
-.popup-content h2 {
-    margin-bottom: 20px;
-    font-size: 20px;
-}
-
-.popup-content .button {
-    margin: 10px 5px;
-    border-radius: 9px;
-    border: none;
-}
+/* Popup Styles */
 .popup {
     position: fixed;
-    display: flex; justify-content: center; align-items: center;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
     z-index: 1000;
-}
-
-.popup-overlay {
-    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-    z-index: 900;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .popup-content {
     background: #fff;
-    border-radius: 8px; padding: 20px;
-    position: relative; z-index: 1001;
+    padding: 20px;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 600px;
+    position: relative;
+}
+
+#package-popup {
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+}
+
+.popup-content {
+    display: block;
+}
+
+.package-details {
+    width: 300px; 
+    padding: 10px;
+    border: 1px solid #ccc;
+    margin: 10px 0; 
+    box-sizing: border-box;
+	border-radius:16px;
+}
+.package-details h5{
+    text-align: center;
+}
+
+.carousel {
+    text-align: center;
+}
+
+.popup-content{
+	width:600px;
+}
+
+.payment-group{
+	display: flex;
+    justify-content: center;
+}
+
+/* Carousel Styles */
+.carousel-inner {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.carousel-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: left;
+}
+
+.package-item {
+    display: flex;
+    justify-content: center;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 10px;
+    transition: transform 0.3s;
+}
+
+.package-item:hover {
+    transform: scale(1.05);
+    border-color: #007bff; /* Màu sắc khi hover */
+}
+
+/* Carousel Control Styles */
+.carousel-control-prev,
+.carousel-control-next {
+    filter: invert(1); /* Đổi màu icon sang trắng */
+    background: none !important; /* Xóa nền khi hover */
+}
+
+.carousel-control-prev:hover,
+.carousel-control-next:hover {
+    background: none !important; /* Xóa nền khi hover */
 }
 
 .close-popup {
-    position: absolute; 
-    top: 10px; 
+    position: absolute;
+    top: 10px;
     right: 10px;
-    background: none; 
+    background: transparent;
     border: none;
-    font-size: 16px; 
-    color: #00AE74; /* Color of the "X" */
+    font-size: 20px;
     cursor: pointer;
-    padding: 5px;
+}
+.close-popup:hover{
+    background-color: transparent !important;
 }
 
-/* Remove hover effect */
-.close-popup:hover {
-    color: #00AE74; /* Keep the same color on hover */
-    background: none; /* Ensure no background on hover */
+/* Button Styles */
+.button {
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s;
+    font-weight: 500;
+    font-size: 16px;
 }
+.add-package{
+    border: 1px solid #D2D5DF !important;
+    background-color: #fff !important;
+    color: #344051 !important;
+    border-radius: 8px !important;
+    line-height: 24px;
+}
+
+.proceed-to-checkout{
+    border: 1px solid #0078D8 !important;
+    background-color: #0078D8 !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    line-height: 24px;
+}
+
+
+.button:hover {
+    background-color: #0056b3;
+}
+
+
 
 /* Resize image network*/
 .product-item.nha-mang img {

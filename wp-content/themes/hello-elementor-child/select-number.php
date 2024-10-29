@@ -1,13 +1,12 @@
 <?php
-/* Template Name: Select Number 1 */
+/* Template Name: Select Number */
 get_header();
 
 // Bootstrap CSS
 echo '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">';
 echo '<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">';
 
-
-// Lấy danh mục sản phẩm SIM
+// Lấy danh mục sản phẩm 
 $sim_category_slug = 'sim';
 
 // Xử lý bộ lọc từ Form 1
@@ -17,6 +16,67 @@ $phone_search = isset($_GET['phone_search']) ? sanitize_text_field($_GET['phone_
 // Xử lý bộ lọc từ Form 2
 $network_filter = isset($_GET['network_filter']) ? sanitize_text_field($_GET['network_filter']) : '';
 $birth_year_filter_2 = isset($_GET['birth_year']) ? sanitize_text_field($_GET['birth_year']) : '';
+
+// Lấy danh sách ID sản phẩm cần loại trừ
+$excluded_product_ids = [];
+
+// Lấy thông tin giỏ hàng
+$cart_items = WC()->cart->get_cart();
+foreach ($cart_items as $cart_item) {
+    $excluded_product_ids[] = $cart_item['product_id'];
+}
+
+// Lấy danh sách ID sản phẩm đang ở trạng thái "tạm giữ"
+$on_hold_orders = wc_get_orders(array(
+    'status' => 'on-hold',
+    'limit' => -1,
+));
+foreach ($on_hold_orders as $order) {
+    foreach ($order->get_items() as $item) {
+        $excluded_product_ids[] = $item->get_product_id();
+    }
+}
+
+// Lấy danh sách ID sản phẩm trong đơn hàng đang xử lý của người dùng
+$current_user_id = get_current_user_id();
+if ($current_user_id) {
+    $processing_orders = wc_get_orders(array(
+        'customer_id' => $current_user_id,
+        'status' => 'processing',
+        'limit' => -1,
+    ));
+
+    foreach ($processing_orders as $order) {
+        foreach ($order->get_items() as $item) {
+            $excluded_product_ids[] = $item->get_product_id();
+        }
+    }
+
+    // Lấy danh sách ID sản phẩm đang ở trạng thái "chờ thanh toán"
+    $pending_orders = wc_get_orders(array(
+        'status' => 'pending', // Trạng thái chờ thanh toán
+        'limit' => -1,
+    ));
+
+    foreach ($pending_orders as $order) {
+        foreach ($order->get_items() as $item) {
+            $excluded_product_ids[] = $item->get_product_id();
+        }
+    }
+
+    // Lấy danh sách ID sản phẩm đã mua của người dùng
+    $purchased_orders = wc_get_orders(array(
+        'customer_id' => $current_user_id,
+        'status' => 'completed',
+        'limit' => -1,
+    ));
+
+    foreach ($purchased_orders as $order) {
+        foreach ($order->get_items() as $item) {
+            $excluded_product_ids[] = $item->get_product_id();
+        }
+    }
+}
 
 // Tạo truy vấn sản phẩm
 $args = array(
@@ -105,10 +165,21 @@ if ($birth_year_filter_2) {
     );
 }
 
+// Loại bỏ các ID trùng lặp
+$excluded_product_ids = array_unique($excluded_product_ids);
+
+// Thêm điều kiện loại trừ vào truy vấn
+if (!empty($excluded_product_ids)) {
+    $args['post__not_in'] = $excluded_product_ids; // Loại trừ các sản phẩm đã bị loại
+}
+
 $query = new WP_Query($args);
 ?>
-<div class="desktop-layou">
+<div class="desktop-layout">
     <!-- Breakcrumd -->
+    <div class="container">
+    <?php if (function_exists('rank_math_the_breadcrumbs')) rank_math_the_breadcrumbs(); ?>
+    </div>
     <!-- Tiêu đề trang -->
     <div class="title-page">
         <h3>Chọn số đẹp, số yêu thích</h3>
@@ -288,166 +359,128 @@ $query = new WP_Query($args);
 ?>
 
 <!-- Thêm mã JavaScript để xử lý popup và các hành động -->
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const addToCartButtons = document.querySelectorAll('.chon-so-button');
+    const addToCartButtons = document.querySelectorAll('.chon-so-button');
 
-        addToCartButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const productId = this.getAttribute('data-product-id');
-                const networkProvider = this.getAttribute('data-network-provider');
-                const phoneNumber = this.getAttribute('data-phone-number');
-                const esimCheckbox = document.querySelector(`.esim-checkbox[data-product-id="${productId}"]`);
-                const isEsimChecked = esimCheckbox ? esimCheckbox.checked : false; // Check if eSIM checkbox is checked
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const productId = this.getAttribute('data-product-id');
+            const networkProvider = this.getAttribute('data-network-provider');
+            const phoneNumber = this.getAttribute('data-phone-number');
 
-
-                // Gọi AJAX để lấy các gói cước có cùng nhà mạng
-                fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: new URLSearchParams({
-                            'action': 'get_packages_by_network',
-                            'network_provider': networkProvider,
-                            'is_esim': isEsimChecked // Pass whether eSIM is checked
-                        })
-                    })
-                    .then(response => response.text())
-                    .then(data => {
-                        document.getElementById('package-select').innerHTML = data;
-                        document.getElementById('package-popup').style.display = 'block';
-                        document.getElementById('package-popup').dataset.productId = productId;
-                        document.getElementById('package-popup').dataset.phoneNumber = phoneNumber;
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
+            // Gọi AJAX để lấy các gói cước có cùng nhà mạng
+            fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    'action': 'get_packages_by_network',
+                    'network_provider': networkProvider
+                })
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('carousel-items').innerHTML = data; // Cập nhật các item trong carousel
+                document.getElementById('package-popup').style.display = 'flex';
+                document.getElementById('package-popup').dataset.productId = productId;
+                document.getElementById('package-popup').dataset.phoneNumber = phoneNumber;
+            })
+            .catch(error => {
+                console.error('Error:', error);
             });
         });
+    });
 
-        // Đóng popup
-        document.querySelector('.close-popup').addEventListener('click', function() {
-            document.getElementById('package-popup').style.display = 'none';
-        });
+    // Đóng popup
+    document.querySelector('.close-popup').addEventListener('click', function() {
+        document.getElementById('package-popup').style.display = 'none';
+    });
 
-        // Thêm gói cước vào giỏ hàng
-        document.querySelector('.add-package').addEventListener('click', function() {
-            const selectedPackageId = document.getElementById('package-select').value;
-            const productId = document.getElementById('package-popup').dataset.productId;
-            const phoneNumber = document.getElementById('package-popup').dataset.phoneNumber;
+    // Thêm gói cước vào giỏ hàng
+    document.querySelector('.add-package').addEventListener('click', function() {
+        const selectedPackageId = document.querySelector('#carousel-items .carousel-item.active .package-item').dataset.id;
+        const productId = document.getElementById('package-popup').dataset.productId;
+        const phoneNumber = document.getElementById('package-popup').dataset.phoneNumber;
 
-            if (selectedPackageId) {
-                // Thêm gói cước vào giỏ hàng
-                fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+        if (selectedPackageId) {
+            // Thêm gói cước vào giỏ hàng
+            fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    'action': 'add_to_cart',
+                    'product_id': selectedPackageId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Thêm sản phẩm SIM vào giỏ hàng với số điện thoại
+                    fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded'
                         },
                         body: new URLSearchParams({
                             'action': 'add_to_cart',
-                            'product_id': selectedPackageId
+                            'product_id': productId,
+                            'phone_number': phoneNumber
                         })
                     })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Thêm sản phẩm SIM vào giỏ hàng với số điện thoại
-                            fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/x-www-form-urlencoded'
-                                    },
-                                    body: new URLSearchParams({
-                                        'action': 'add_to_cart',
-                                        'product_id': productId,
-                                        'phone_number': phoneNumber
-                                    })
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        alert('Gói cước và SIM đã được thêm vào giỏ hàng.');
-                                        document.getElementById('package-popup').style.display = 'none';
-                                    } else {
-                                        alert('Có lỗi xảy ra khi thêm gói cước vào giỏ hàng.');
-                                    }
-                                });
+                            alert('Gói cước và SIM đã được thêm vào giỏ hàng.');
+                            document.getElementById('package-popup').style.display = 'none';
+                            location.reload(); // Tải lại trang sau khi thêm thành công
                         } else {
                             alert('Có lỗi xảy ra khi thêm gói cước vào giỏ hàng.');
                         }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
                     });
-            } else {
-                alert('Vui lòng chọn một gói cước.');
-            }
-        });
-        
+                } else {
+                    alert('Có lỗi xảy ra khi thêm gói cước vào giỏ hàng.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        } else {
+            alert('Vui lòng chọn một gói cước.');
+        }
     });
 
-    document.getElementById('filter-fast').addEventListener('change', function() {
-        this.submit();
+        document.getElementById('filter-fast').addEventListener('change', function() {
+            this.submit();
+        });
     });
 </script>
-<style>
-    .sim-selection {
-        display: flex;
-        align-items: center;
-        /* Đảm bảo các phần tử nằm trên cùng một hàng */
-    }
-
-    .sim-selection label {
-        margin-right: 10px;
-        /* Khoảng cách giữa checkbox và icon */
-    }
-
-    .tooltip-container {
-        position: relative;
-        display: inline-block;
-    }
-
-    .info-icon {
-        font-size: 15px;
-        /* Kích thước icon */
-        color: #161F42;
-        cursor: pointer;
-    }
-
-    .tooltip-text {
-        visibility: hidden;
-        width: 200px;
-        background-color: #555;
-        color: #fff;
-        text-align: center;
-        border-radius: 6px;
-        padding: 8px;
-        position: absolute;
-        z-index: 1;
-        bottom: 125%;
-        left: 50%;
-        margin-left: -100px;
-        opacity: 0;
-        transition: opacity 0.3s;
-    }
-
-    .tooltip-container:hover .tooltip-text {
-        visibility: visible;
-        opacity: 1;
-    }
-</style>
 
 <div id="package-popup" class="popup" style="display:none;">
     <div class="popup-overlay"></div>
     <div class="popup-content">
-        <button class="close-popup" aria-label="Close Popup" title="Close Popup">✖</button> <!-- X button -->
+        <button class="close-popup" aria-label="Close Popup" title="Đóng">✖</button>
         <h2>Chọn gói cước</h2>
-        <select id="package-select"></select>
+        <div id="package-carousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner" id="carousel-items"></div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#package-carousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#package-carousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+        <div class="payment-group">
         <button class="button add-package">Thêm vào giỏ hàng</button>
         <button class="button proceed-to-checkout">Tiến hành thanh toán</button>
-
+        </div>
     </div>
 </div>
 

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none">
+    <rect width="40" height="40" rx="20" fill="#FFFFFF" fill-opacity="1"></rect> <!-- Màu nền -->
+    <rect x="0.5" y="0.5" width="39" height="39" rx="19.5" stroke="#2F2B431A" stroke-opacity="0.1"></rect> <!-- Border màu -->
+    <path d="M15.828 18.9997H28V20.9997H15.828L21.192 26.3637L19.778 27.7777L12 19.9997L19.778 12.2217L21.192 13.6357L15.828 18.9997Z" fill="#2F2B4333" fill-opacity="1"></path> <!-- Mũi tên màu -->
+    <path d="M15.4744 18.6461L14.6209 19.4997H15.828H27.5V20.4997H15.828H14.6209L15.4744 21.3532L20.4849 26.3637L19.778 27.0706L12.7071 19.9997L19.778 12.9288L20.4849 13.6357L15.4744 18.6461Z" stroke="#2F2B431A" stroke-opacity="0.2"></path> <!-- Border màu -->
+</svg>
