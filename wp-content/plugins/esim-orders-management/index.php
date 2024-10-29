@@ -34,8 +34,15 @@ function my_theme_scripts() {
      wp_add_inline_script('select2-js', "
      jQuery(document).ready(function($) {
          $('#goicuoc_id').select2({
-             allowClear: true
+             allowClear: true,
+             placeholder: 'Loại gói cước',
          });
+
+         $('#user_id').select2({
+             allowClear: true,
+             placeholder: 'Nhân viên tư vấn',
+         });
+         
      });
  ");
     
@@ -91,55 +98,100 @@ function list_custom_order_html() {
     ];
     $listGoiCuoc = new WP_Query($args_goi_cuoc);
 
-    // var_dump($listGoiCuoc);
+   // Lấy và xử lý các tham số đầu vào
     $from_date = isset($_GET['from_date']) && !empty($_GET['from_date']) ? sanitize_text_field($_GET['from_date']) : date('Y-m-d', strtotime('-7 days'));
     $to_date = isset($_GET['to_date']) && !empty($_GET['to_date']) ? sanitize_text_field($_GET['to_date']) : date('Y-m-d');
-    
     $sales_channel = isset($_GET['sales_channel']) ? sanitize_text_field($_GET['sales_channel']) : '';
     $customer_phone = isset($_GET['customer_phone']) ? sanitize_text_field($_GET['customer_phone']) : '';
-    $user_id = isset($_GET['user_id']) ? sanitize_text_field($_GET['user_id']) : '';
-    $goicuoc_id = isset($_GET['goicuoc_id']) ? $_GET['goicuoc_id'] : array();
-    // Xây dựng câu truy vấn dựa trên filter
-    $query = "SELECT * FROM $table_name WHERE 1=1";
 
+    // Lọc và chuẩn hóa user_id
+    $user_id = isset($_GET['user_id']) && is_array($_GET['user_id']) ? array_filter($_GET['user_id'], 'is_numeric') : array();
+    $user_id = array_map('intval', $user_id);
+
+    // Lọc và chuẩn hóa goicuoc_id
+    $goicuoc_id = isset($_GET['goicuoc_id']) && is_array($_GET['goicuoc_id']) ? array_filter($_GET['goicuoc_id'], 'is_numeric') : array();
+    $goicuoc_id = array_map('intval', $goicuoc_id);
+
+    // Khởi tạo câu truy vấn
+    $query = "SELECT * FROM $table_name WHERE 1=1";
+    $params = [];
+
+    // Điều kiện từ ngày
     if ($from_date) {
-        $query .= " AND created_date >= '$from_date'";
+        $query .= " AND created_date >= %s";
+        $params[] = $from_date;
     }
+
+    // Điều kiện đến ngày
     if ($to_date) {
         $to_date_end = $to_date . ' 23:59:59';
-        $query .= " AND created_date <= '$to_date_end'";
-    }
-    
-    if ($sales_channel) {
-        $query .= " AND sales_channel = '$sales_channel'";
-    }
-    if ($customer_phone) {
-        $query .= " AND customer_phone LIKE '%$customer_phone%'";
-    }
-    if ($user_id) {
-        $query .= " AND user_id LIKE '%$user_id%'";
-    }
-    if (!empty($goicuoc_id)) {
-        $all_ids = [];
-    
-        // Duyệt qua từng ID sản phẩm cha
-        foreach ($goicuoc_id as $parent_id) {
-            $all_ids[] = intval($parent_id); // Thêm ID sản phẩm cha vào mảng
-    
-            // Lấy tất cả các biến thể của sản phẩm cha
-            $product = wc_get_product($parent_id);
-            if ($product && $product->is_type('variable')) {
-                $variation_ids = $product->get_children(); // Lấy danh sách ID biến thể
-                $all_ids = array_merge($all_ids, array_map('intval', $variation_ids)); // Thêm ID biến thể vào mảng
-            }
-        }
-    
-        // Chuyển đổi mảng thành chuỗi để sử dụng trong truy vấn SQL
-        $goicuoc_ids = implode(',', $all_ids);
-        $query .= " AND goicuoc_id IN ($goicuoc_ids)";
+        $query .= " AND created_date <= %s";
+        $params[] = $to_date_end;
     }
 
+    // Điều kiện kênh bán hàng
+    if ($sales_channel) {
+        $query .= " AND sales_channel = %s";
+        $params[] = $sales_channel;
+    }
+
+    // Điều kiện số điện thoại khách hàng
+    if ($customer_phone) {
+        $query .= " AND customer_phone LIKE %s";
+        $params[] = '%' . $wpdb->esc_like($customer_phone) . '%';
+    }
+
+    // Điều kiện user_id
+    if (!empty($user_id)) {
+        $user_ids = implode(',', $user_id);
+        $query .= " AND user_id IN ($user_ids)";
+    }
+
+    // Điều kiện goicuoc_id
+    if (!empty($goicuoc_id)) {
+        $all_ids = [];
+        
+        foreach ($goicuoc_id as $parent_id) {
+            $all_ids[] = $parent_id;
+
+            // Lấy biến thể của sản phẩm
+            $product = wc_get_product($parent_id);
+            if ($product && $product->is_type('variable')) {
+                $variation_ids = $product->get_children();
+                $all_ids = array_merge($all_ids, $variation_ids);
+            }
+        }
+
+        // Chỉ lấy các giá trị số
+        $all_ids = array_map('intval', array_unique($all_ids));
+
+        if ($all_ids) {
+            $placeholders = implode(',', array_fill(0, count($all_ids), '%d'));
+            $query .= " AND goicuoc_id IN ($placeholders)";
+            $params = array_merge($params, $all_ids);
+        }
+    }
+
+    
+    $per_page = 20; // Số lượng đơn hàng trên mỗi trang
+    $query1 = $wpdb->prepare($query, ...$params);
+    $total_count = count($wpdb->get_results($query1));
+    $total_pages = ceil($total_count / $per_page);
+
+    // Phân trang
+    $current_page = max(1, (isset($_GET['paged']) ? intval($_GET['paged']) : 1));
+    if($current_page > $total_pages) $current_page = $total_pages;
+    $offset = ($current_page - 1) * $per_page; // Tính toán offset
+    $query .= " ORDER BY created_date DESC LIMIT %d OFFSET %d";
+    $params[] = $per_page;
+    $params[] = $offset;
+
+
+    // Chuẩn bị và thực hiện truy vấn
+    $query = $wpdb->prepare($query, ...$params);
     $orders = $wpdb->get_results($query);
+
+    $users = get_users();
     ?>
 
     <div class="wrap">
@@ -152,26 +204,31 @@ function list_custom_order_html() {
                     <span>Thời gian đặt hàng:</span>
                     <span>từ ngày </span><input type="date" name="from_date" value="<?php echo esc_attr($from_date); ?>">
                     <span> đến ngày </span><input type="date" name="to_date" value="<?php echo esc_attr($to_date); ?>">
+
                 </div>
                 <div class="alignleft actions">
-                <select name="goicuoc_id[]" id="goicuoc_id" multiple >
-                        <option value="">--Tất cả--</option>
-                       <?php while ($listGoiCuoc->have_posts()) : $listGoiCuoc->the_post();
-                       ?>
-                       
-                       
-                       <option value="<?php echo get_the_ID(); ?>" <?php echo in_array(get_the_ID(),$goicuoc_id) ? 'selected' : ''; ?>>
-                            <?php echo esc_html(get_the_title()); ?>
-                        </option>
-                       <?php endwhile?>
-                    </select>
+                    <input type="text" name="customer_phone" placeholder="Số điện thoại" value="<?php echo esc_attr($customer_phone); ?>">
                     <select name="sales_channel" id="sales_channel">
                         <option value="">Kênh bán</option>
                         <option <?php selected($sales_channel, 'Esimdata'); ?> value="Esimdata">Esimdata</option>
                         <option <?php selected($sales_channel, 'Landing'); ?> value="Landing">Landing</option>
                     </select>
-                    <input type="text" name="customer_phone" placeholder="Số điện thoại" value="<?php echo esc_attr($customer_phone); ?>">
-                    <input type="text" name="user_id" placeholder="Nhân viên gọi" value="<?php echo esc_attr($user_id); ?>">
+                    <select name="goicuoc_id[]" id="goicuoc_id" multiple >
+                        <?php while ($listGoiCuoc->have_posts()) : $listGoiCuoc->the_post();?>
+                        <option value="<?php echo get_the_ID(); ?>" <?php echo in_array(get_the_ID(),$goicuoc_id) ? 'selected' : ''; ?>>
+                                <?php echo esc_html(get_the_title()); ?>
+                            </option>
+                        <?php endwhile?>
+                    </select>
+                    
+                    <select name="user_id[]" id="user_id" multiple>
+                        <option value="">-- Chọn người tư vấn --</option>
+                        <?php 
+                            foreach ($users as $user) {
+                                echo '<option value="' . esc_attr($user->ID) . '" ' . (in_array($user->ID, $user_id) ? 'selected' : '') . '>' . esc_html($user->display_name) . '</option>';
+                            }
+                        ?>
+                    </select>
                     <input type="submit" name="filter_action" id="order-query-submit" class="button" value="Tìm kiếm">
                 </div>
             </div>
@@ -202,8 +259,8 @@ function list_custom_order_html() {
                                 <td><?php echo esc_html($order->created_date); ?></td>
                                 <td><?php echo esc_html($order->customer_name); ?></td>
                                 <td><?php echo esc_html($order->customer_phone); ?></td>
-                                <td><?php echo esc_html(wc_get_product($order->goicuoc_id)->get_name()); ?></td>
-                                <td><?php echo esc_html(wc_get_product($order->sim_id)->get_name()); ?></td>
+                                <td class="name-item"><?php echo esc_html($order->package_name); ?></td>
+                                <td class="name-item"><?php echo esc_html($order->phone_number); ?></td>
                                 <td><?php echo number_format($order->sim_price, 0, ',', '.'); ?></td>
                                 <td><?php echo number_format($order->goicuoc_price, 0, ',', '.'); ?></td>
                                 <td><strong><?php echo number_format($order->total_price, 0, ',', '.'); ?></strong></td>
@@ -230,6 +287,30 @@ function list_custom_order_html() {
                     <?php } ?>
                 </tbody>
             </table>
+            <div class="tablenav bottom">
+                <div class="tablenav-pages">
+                    <?php if ($total_pages > 1) : ?>
+                        <span class="displaying-num"><?php echo number_format($total_count); ?> bản ghi</span>
+                        <span class="pagination-links">
+                            <!-- Previous Page Link -->
+                            <?php if ($current_page > 1) : ?>
+                                <a href="<?php echo add_query_arg('paged', 1); ?>"><<</a>
+                                <a href="<?php echo add_query_arg('paged', $current_page - 1); ?>"><</a>
+                            <?php endif; ?>
+
+                            <!-- Current Page Info -->
+                            <span><?php echo $current_page; ?> trên <?php echo $total_pages; ?></span>
+
+                            <!-- Next Page Link -->
+                            <?php if ($current_page < $total_pages) : ?>
+                                <a href="<?php echo add_query_arg('paged', $current_page + 1); ?>">></a>
+                                <a href="<?php echo add_query_arg('paged', $total_pages); ?>">>></a>
+                            <?php endif; ?>
+                        </span>
+                    <?php endif; ?>
+                </div>
+            </div>
+
         </form>
     </div>
 <?php } ?>
