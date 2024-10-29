@@ -5,14 +5,14 @@ get_header();
 ?>
 <link rel="stylesheet" href="<?php echo get_stylesheet_directory_uri(); ?>/assets/css/page-checkout.css" type="text/css">
 
-<div class="custom-checkout">
+<div class="page-checkout">
     <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
         <?php wp_nonce_field('checkout_payment', 'checkout_nonce'); ?>
         <input type="hidden" id="action-form" name="action" value="process_checkout">
     
         <h1 class="header-title">Thanh toán đơn hàng</h1>
-        <div class="row">
-            <div class="col-md-8 col-12">
+        <div class="row content">
+            <div class="left">
                 <div class="sim-type box-content">
                     <h2 class="title" >Loại hình SIM</h2>
                     <div class="sim-options">
@@ -90,100 +90,100 @@ get_header();
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 col-12">
-            <div class="cart-list box-content">
-                <h3 class="title">
-                    Đơn hàng
-                    <img src="<?php echo get_stylesheet_directory_uri(); ?>/assets/image/trash.svg" alt="xoá" class="icon-trash">
-                </h3>
-                <div class="list-item">
-                    <?php 
-                        $totalAmount = 0;
-                        $feeShip = 0;
-                        if ( WC()->cart->is_empty() ) {
-                            echo '<p>Giỏ hàng của bạn đang trống.</p>';
-                        } else {
-                            $items = WC()->cart->get_cart();
-                            $items = array_values($items); 
-                            // Lặp qua giỏ hàng và lấy từng cặp 2 sản phẩm liên tiếp
-                            for ( $i = 0; $i < count($items); $i += 2 ) {
-                                if ( isset($items[$i]) && isset($items[$i + 1]) ) {
-                                    $product1 = $items[$i]['data'];
-                                    $product2 = $items[$i + 1]['data'];
+            <div class="right">
+                <div class="cart-list box-content">
+                    <h3 class="title">
+                        Đơn hàng
+                        <img src="<?php echo get_stylesheet_directory_uri(); ?>/assets/image/trash.svg" alt="xoá" class="icon-trash">
+                    </h3>
+                    <div class="list-item">
+                        <?php 
+                            $totalAmount = 0;
+                            $feeShip = 0;
+                            if ( WC()->cart->is_empty() ) {
+                                echo '<p>Giỏ hàng của bạn đang trống.</p>';
+                            } else {
+                                $items = WC()->cart->get_cart();
+                                $items = array_values($items); 
+                                // Lặp qua giỏ hàng và lấy từng cặp 2 sản phẩm liên tiếp
+                                for ( $i = 0; $i < count($items); $i += 2 ) {
+                                    if ( isset($items[$i]) && isset($items[$i + 1]) ) {
+                                        $product1 = $items[$i]['data'];
+                                        $product2 = $items[$i + 1]['data'];
 
-                                    // Kiểm tra xem sản phẩm có phải là biến thể không
-                                    $parent_id1 = $product1->get_type() === 'variation' ? $product1->get_parent_id() : $product1->get_id();
-                                    $parent_id2 = $product2->get_type() === 'variation' ? $product2->get_parent_id() : $product2->get_id();
+                                        // Kiểm tra xem sản phẩm có phải là biến thể không
+                                        $parent_id1 = $product1->get_type() === 'variation' ? $product1->get_parent_id() : $product1->get_id();
+                                        $parent_id2 = $product2->get_type() === 'variation' ? $product2->get_parent_id() : $product2->get_id();
 
-                                    // Lấy danh mục từ sản phẩm cha
-                                    $product1_categories = wp_get_post_terms($parent_id1, 'product_cat', array('fields' => 'names'));
-                                    $product2_categories = wp_get_post_terms($parent_id2, 'product_cat', array('fields' => 'names'));
-                                    
-                                    $sim = null; 
-                                    $goicuoc = null; 
-                                    
-                                    // Xác định sản phẩm SIM và Gói cước
-                                    if ( in_array( 'Sim', $product1_categories ) ) {
-                                        $sim = $product1;
-                                    } elseif ( in_array( 'Gói cước', $product1_categories ) ) {
-                                        $goicuoc = $product1;
-                                    }
-                            
-                                    if ( in_array( 'Sim', $product2_categories ) ) {
-                                        $sim = $product2;
-                                    } elseif ( in_array( 'Gói cước', $product2_categories ) ) {
-                                        $goicuoc = $product2;
-                                    }
+                                        // Lấy danh mục từ sản phẩm cha
+                                        $product1_categories = wp_get_post_terms($parent_id1, 'product_cat', array('fields' => 'names'));
+                                        $product2_categories = wp_get_post_terms($parent_id2, 'product_cat', array('fields' => 'names'));
+                                        
+                                        $sim = null; 
+                                        $goicuoc = null; 
+                                        
+                                        // Xác định sản phẩm SIM và Gói cước
+                                        if ( in_array( 'Sim', $product1_categories ) ) {
+                                            $sim = $product1;
+                                        } elseif ( in_array( 'Gói cước', $product1_categories ) ) {
+                                            $goicuoc = $product1;
+                                        }
+                                
+                                        if ( in_array( 'Sim', $product2_categories ) ) {
+                                            $sim = $product2;
+                                        } elseif ( in_array( 'Gói cước', $product2_categories ) ) {
+                                            $goicuoc = $product2;
+                                        }
 
-                                    // Lấy chu kỳ
-                                    $chu_ky = 1;
-                                    if (isset($goicuoc->get_attributes()['pa_chon-chu-ky'])) {
-                                        $chu_ky_full = $goicuoc->get_attributes()['pa_chon-chu-ky'];
-                                        $chu_ky_parts = explode('-thang', $chu_ky_full);
-                                        $chu_ky = $chu_ky_parts[0]; // Lấy phần trước "-thang"
-                                    }
+                                        // Lấy chu kỳ
+                                        $chu_ky = 1;
+                                        if (isset($goicuoc->get_attributes()['pa_chon-chu-ky'])) {
+                                            $chu_ky_full = $goicuoc->get_attributes()['pa_chon-chu-ky'];
+                                            $chu_ky_parts = explode('-thang', $chu_ky_full);
+                                            $chu_ky = $chu_ky_parts[0]; // Lấy phần trước "-thang"
+                                        }
 
-                                    // In ra thông tin sản phẩm nếu đã xác định được
-                                    if ( $sim && $goicuoc ) {
-                                        // Cộng dồn tổng tiền
-                                        $totalAmount += $sim->get_price() + $goicuoc->get_price(); // Cộng giá của SIM và Gói cước
+                                        // In ra thông tin sản phẩm nếu đã xác định được
+                                        if ( $sim && $goicuoc ) {
+                                            // Cộng dồn tổng tiền
+                                            $totalAmount += $sim->get_price() + $goicuoc->get_price(); // Cộng giá của SIM và Gói cước
 
-                                        echo '
-                                            <div class="combo-item">
-                                                <div>
-                                                    <span class="sub-title">Số đã chọn</span>
-                                                    <span class="name-product phone">' . esc_html($sim->get_name()) . '</span>
-                                                    <input type="hidden" class="sim-id" value="' . esc_attr($sim->get_id()) . '">
+                                            echo '
+                                                <div class="combo-item">
+                                                    <div>
+                                                        <span class="sub-title">Số đã chọn</span>
+                                                        <span class="name-product phone">' . esc_html($sim->get_name()) . '</span>
+                                                        <input type="hidden" class="sim-id" value="' . esc_attr($sim->get_id()) . '">
+                                                    </div>
+                                                    <div>
+                                                        <span class="sub-title">Loại sim</span>
+                                                        <span class="name-product">SIM vật lý</span>
+                                                        <span class="price">' . wc_price($sim->get_price()) . '</span>
+                                                    </div>
+                                                    <div>
+                                                        <span class="sub-title">Gói cước</span>
+                                                        <span class="name-product">' . esc_html($goicuoc->get_name()) . '</span>
+                                                        <input type="hidden" class="goicuoc-id" value="' . esc_attr($goicuoc->get_id()) . '"> 
+                                                    </div>
+                                                    <div>
+                                                        <span class="sub-title">Chu kỳ</span>
+                                                        <span class="name-product ">' . $chu_ky . ' tháng</span>
+                                                        <span class="price">' . wc_price($goicuoc->get_price()) . '</span>
+                                                        <input type="hidden" class="chu_ky_goi_cuoc" value="' . esc_attr($chu_ky) . '"> 
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <span class="sub-title">Loại sim</span>
-                                                    <span class="name-product">SIM vật lý</span>
-                                                    <span class="price">' . wc_price($sim->get_price()) . '</span>
-                                                </div>
-                                                <div>
-                                                    <span class="sub-title">Gói cước</span>
-                                                    <span class="name-product">' . esc_html($goicuoc->get_name()) . '</span>
-                                                    <input type="hidden" class="goicuoc-id" value="' . esc_attr($goicuoc->get_id()) . '"> 
-                                                </div>
-                                                <div>
-                                                    <span class="sub-title">Chu kỳ</span>
-                                                    <span class="name-product ">' . $chu_ky . ' tháng</span>
-                                                    <span class="price">' . wc_price($goicuoc->get_price()) . '</span>
-                                                    <input type="hidden" class="chu_ky_goi_cuoc" value="' . esc_attr($chu_ky) . '"> 
-                                                </div>
-                                            </div>
-                                        ';
-                                    } else {
-                                        // Xoá khỏi giỏ hàng nếu không đủ thông tin
-                                        // WC()->cart->remove_cart_item($items[$i]['key']);
-                                        // WC()->cart->remove_cart_item($items[$i + 1]['key']);
+                                            ';
+                                        } else {
+                                            // Xoá khỏi giỏ hàng nếu không đủ thông tin
+                                            // WC()->cart->remove_cart_item($items[$i]['key']);
+                                            // WC()->cart->remove_cart_item($items[$i + 1]['key']);
+                                        }
                                     }
                                 }
                             }
-                        }
-                    ?>
+                        ?>
+                    </div>
                 </div>
-            </div>
                 <button class="buy-more">
                     Mua thêm 
                     <img src="<?php echo get_stylesheet_directory_uri(); ?>/assets/image/plus.svg" alt="xoá" class="icon-trash">

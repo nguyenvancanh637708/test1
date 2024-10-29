@@ -5,13 +5,25 @@ body{
     background: #F0F6FF;
 }
 
-.custom-checkout {
+.page-checkout {
     width: 100%;
-    max-width: 1250px;
+    max-width: 1152px;
     margin: 0 auto;
     font-family: Arial, sans-serif;
 }
 
+.page-checkout .row.content{
+    display: flex;
+    gap: 24px ;
+}
+.page-checkout .row.content .left{
+    width: 66.66%;
+    padding: 0;
+}
+.page-checkout .row.content .right{
+   flex: 1;
+   padding: 0;
+}
 
 .header-title {
     text-align: center;
@@ -21,8 +33,8 @@ body{
     font-weight: 700;
 }
 
-.custom-checkout .box-content{
-    margin-bottom: 24px;
+.page-checkout .box-content{
+    margin-bottom: 16px;
     padding: 20px;
     border-radius: 8px;
     background: #fff;
@@ -53,6 +65,10 @@ body{
     display: flex;
     gap: 12px;
     margin-top:16px;
+}
+select,
+.payment-option{
+    cursor: pointer;
 }
 .sim-option input,
 .payment-option input{
@@ -249,5 +265,36 @@ body{
     cursor: not-allowed; 
     opacity: 0.65; 
     pointer-events: none; 
+}
+
+
+@media screen and (max-width: 1023px) {
+    .page-checkout{
+        padding: 24px 36px ;
+    }
+    .page-checkout .row.content{
+        display: flex;
+        gap: 24px ;
+    }
+    .page-checkout .row.content .left{
+        width: 100%;
+        padding: 0;
+        /* order: 2 */
+    }
+    .page-checkout .row.content .right{
+       flex: 1;
+       padding: 0;
+       /* order: 1; */
+    }
+    .address-fields,
+    .sim-options{
+        flex-direction: column;
+    }
+    .address-fields select {
+        margin-top: 0;
+    }
+    .payment-options {
+        grid-template-columns: 1fr;
+    }
 }
 

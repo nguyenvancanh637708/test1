@@ -5,12 +5,108 @@ function update_customer_order_info_html(){
     $order_id = isset($_GET['order_id']) ? intval($_GET['order_id']) : 0;
     //Lấy ra đơn hàng tương ứng với order_id
     $order = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $order_id));
+
+    
  
     // Kiểm tra nếu không tìm thấy đơn hàng
     if (!$order) {
         echo '<div class="wrap"><h1 class="wp-heading-inline">Đơn hàng không tồn tại</h1></div>';
         return;
     }
+    else{
+        $sim = wc_get_product($order->sim_id);
+        $afc_nha_mang = $sim ? $sim->get_meta('nha_mang') : '';
+        $goicuoc = wc_get_product($order->goicuoc_id);
+
+        if ($afc_nha_mang) {
+            // Thiết lập truy vấn lấy sản phẩm thuộc danh mục "Sim"
+            $args_sim = [
+                'post_type'      => 'product',
+                'posts_per_page' => -1,
+                'tax_query'      => [
+                    [
+                        'taxonomy' => 'product_cat',
+                        'field'    => 'slug',
+                        'terms'    => 'sim', // Danh mục "Sim"
+                    ],
+                ],
+                'meta_query'     => [
+                    [
+                        'key'     => 'nha_mang',
+                        'value'   => $afc_nha_mang,
+                        'compare' => '=', 
+                    ],
+                ],
+            ];
+
+            // Thiết lập truy vấn lấy sản phẩm thuộc danh mục "Gói cước"
+            $args_goi_cuoc = [
+                'post_type'      => 'product',
+                'posts_per_page' => -1,
+                'tax_query'      => [
+                    [
+                        'taxonomy' => 'product_cat',
+                        'field'    => 'slug',
+                        'terms'    => 'goi-cuoc', // Danh mục "Gói cước"
+                    ],
+                ],
+                'meta_query'     => [
+                    [
+                        'key'     => 'nha_mang',
+                        'value'   => $afc_nha_mang,
+                        'compare' => '=', 
+                    ],
+                ],
+            ];
+            
+            // Thực hiện truy vấn Sim
+            $query_sim = new WP_Query($args_sim);
+            $sim_products = [];
+            if ($query_sim->have_posts()) {
+                while ($query_sim->have_posts()) {
+                    $query_sim->the_post();
+                    $sim_products[] = wc_get_product(get_the_ID());
+                }
+                wp_reset_postdata();
+            }
+
+            // Thực hiện truy vấn Gói cước
+            $query_goi_cuoc = new WP_Query($args_goi_cuoc);
+            $goi_cuoc_variations = [];
+
+            if ($query_goi_cuoc->have_posts()) {
+                while ($query_goi_cuoc->have_posts()) {
+                    $query_goi_cuoc->the_post();
+                    $product = wc_get_product(get_the_ID());
+
+                    // Kiểm tra nếu sản phẩm là loại variable (có biến thể)
+                    if ($product->is_type('variable')) {
+                        $variations = $product->get_children(); 
+
+                        foreach ($variations as $variation_id) {
+                            $variation = wc_get_product($variation_id);
+                            $goi_cuoc_variations[] = $variation; 
+                        }
+                    } else {
+                        // Nếu không có biến thể, chỉ thêm sản phẩm chính nếu meta khớp
+                        if ($product->get_meta('nha_mang') == $afc_nha_mang) {
+                            $goi_cuoc_variations[] = $product;
+                        }
+                    }
+                }
+                wp_reset_postdata(); // Đặt lại dữ liệu sau truy vấn
+            }
+
+
+        } else {
+            echo '<div class="wrap"><h1 class="wp-heading-inline">Không lấy được nhà mạng của SIM</h1></div>';
+            return;
+        }
+    }
+
+
+
+
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         //Cập nhật danh sách đơn hàng khách hàng đặt
         $updated_order = array(
@@ -57,17 +153,42 @@ function update_customer_order_info_html(){
                 <tr>
                     <th><label for="sim_id">Sim số đã chọn</label></th>
                     <td>
-                        <select name="sim_id" class="regular-text">
-                            <option value="<?php echo esc_html($order->sim_id)?>"><?php echo esc_html(wc_get_product($order->sim_id)->get_name()); ?> - <?php echo get_post_meta($order->sim_id, 'nha_mang', true) ?></option>
-                        </select>
+                        <?php 
+                            echo '<select name="sim_id" class="regular-text">';
+                            foreach ($sim_products as $product) {
+                                $sim_id = $product->get_id();
+                                $sim_name = $product->get_name();
+                                $sim_price = $product->get_price();
+
+                                $selected = ($sim_id == $order->sim_id) ? 'selected' : '';
+                                echo '<option value="' . esc_attr($sim_id) . '" ' . $selected . '>';
+                                echo esc_html($sim_name);
+                                echo " | Giá: ";
+                                echo wc_price($sim_price);
+                                echo '</option>';
+                            }
+                            echo '</select>';
+                        ?>
                     </td>
                 </tr>
                 <tr>
                     <th><label for="goicuoc_id">Gói cước</label></th>
                     <td>
-                        <select  class="regular-text" name="goicuoc_id">
-                            <option value="<?php echo esc_html($order->goicuoc_id)?>"><?php echo esc_html(wc_get_product($order->goicuoc_id)->get_name()); ?></option>
-                        </select>
+                        <?php 
+                            echo '<select name="goicuoc_id" class="regular-text">';
+                            foreach ($goi_cuoc_variations as $product) {
+                                $goicuoc_id = $product->get_id();
+                                $goicuoc_name = $product->get_name();
+                                $goicuoc_price = $product->get_price();
+                                $selected = ($goicuoc_id == $order->goicuoc_id) ? 'selected' : '';
+                                echo '<option value="' . esc_attr($goicuoc_id) . '" ' . $selected . '>';
+                                echo esc_html($goicuoc_name);
+                                echo " | Giá: ";
+                                echo wc_price($goicuoc_price);
+                                echo '</option>';
+                            }
+                            echo '</select>';
+                        ?>
                     </td>
                 </tr>
                 
@@ -75,9 +196,8 @@ function update_customer_order_info_html(){
                     <th><label for="sim_type">Loại hình sim</label></th>
                     <td>
                         <select class="regular-text" name="sim_type">
-                            <option><?php echo $order->sim_type==0?"Sim vật lý":"Esim"?></option>
-                            <option value="0">Sim vật lý</option>
-                            <option value="1">Esim</option>
+                            <option value="0" <?php echo $order->sim_type==0?"selected":""?>>Sim vật lý</option>
+                            <option value="1" <?php echo $order->sim_type==1?"selected":""?>>Esim</option>
                         </select>
                     </td>
                 </tr>

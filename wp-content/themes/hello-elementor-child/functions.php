@@ -26,7 +26,6 @@ function handle_checkout_payment() {
     $products = isset($_POST['products']) ? $_POST['products'] : [];
     global $wpdb;
 
-    // Lấy dữ liệu từ form
     $province = isset($_POST['province']) ? sanitize_text_field($_POST['province']) : '';
     $district = isset($_POST['district']) ? sanitize_text_field($_POST['district']) : '';
     $ward = isset($_POST['ward']) ? sanitize_text_field($_POST['ward']) : '';
@@ -36,64 +35,70 @@ function handle_checkout_payment() {
     $customer_name = isset($_POST['customer_name']) ? sanitize_text_field($_POST['customer_name']) : '';
     $customer_phone = isset($_POST['customer_phone']) ? sanitize_text_field($_POST['customer_phone']) : '';
 
-    // Tên bảng
     $table_name = 'wp_esim_orders';
     $order_inserted = false;
     $feeShip = 0;
 
-    foreach ($products as $product) {
-        $sim_id = sanitize_text_field($product['sim_id']);
-        $goicuoc_id = sanitize_text_field($product['goicuoc_id']);
-        $chuky = sanitize_text_field($product['chuky']);
-        
-        // Lấy thông tin sản phẩm từ DB
-        $sim_product = wc_get_product($sim_id);
-        $goicuoc_product = wc_get_product($goicuoc_id);
+    $wpdb->query('START TRANSACTION');
+    try {
+        foreach ($products as $product) {
+            $sim_id = sanitize_text_field($product['sim_id']);
+            $goicuoc_id = sanitize_text_field($product['goicuoc_id']);
+            $chuky = sanitize_text_field($product['chuky']);
+            
+            $sim_product = wc_get_product($sim_id);
+            $goicuoc_product = wc_get_product($goicuoc_id);
 
-        if ($sim_product && $goicuoc_product) {
-            // Dữ liệu cần lưu cho mỗi cặp sản phẩm
-            $data = [
-                // 'created_date' => current_time('mysql'),
-                'customer_name' => $customer_name,
-                'customer_phone' => $customer_phone,
-                'customer_add' => $detailed_address . ', ' . $ward . ', ' . $district . ', ' . $province,
-                'sim_id' => $sim_id,
-                'phone_number' => $sim_product->get_name(),
-                'sim_price' => $sim_product->get_price(),
-                'goicuoc_id' => $goicuoc_id,
-                'package_name' => $goicuoc_product->get_name(),
-                'goicuoc_price' => $goicuoc_product->get_price(),
-                'sim_type' => $sim_type,
-                'package_cycle' => $chuky, 
-                'sim_priceShip' => $feeShip,
-                'total_price' => $sim_product->get_price() + $goicuoc_product->get_price() + $feeShip,
-                'sales_channel' => 'Esimdata',
-                'status' => 0,
-            ];
+            if ($sim_product && $goicuoc_product) {
+                // Kiểm tra xem `phone_number` đã tồn tại chưa với status != -1 // thất bại
+                $phone_number = $sim_product->get_name();
+                $exists = $wpdb->get_var($wpdb->prepare(
+                    "SELECT COUNT(*) FROM $table_name WHERE phone_number = %s AND status != %d",
+                    $phone_number, -1
+                ));
 
-            $result = $wpdb->insert($table_name, $data);
+                if ($exists) {
+                    $wpdb->query('ROLLBACK');
+                    wp_send_json_error('Số điện thoại đã được đặt bởi người khác! Vui lòng chọn số khác!');
+                    wp_die();
+                }
 
-            if ($result !== false) {
+                // Dữ liệu cần lưu cho mỗi cặp sản phẩm
+                $data = [
+                    'customer_name' => $customer_name,
+                    'customer_phone' => $customer_phone,
+                    'customer_add' => $detailed_address . ', ' . $ward . ', ' . $district . ', ' . $province,
+                    'sim_id' => $sim_id,
+                    'phone_number' => $phone_number,
+                    'sim_price' => $sim_product->get_price(),
+                    'goicuoc_id' => $goicuoc_id,
+                    'package_name' => $goicuoc_product->get_name(),
+                    'goicuoc_price' => $goicuoc_product->get_price(),
+                    'sim_type' => $sim_type,
+                    'package_cycle' => $chuky,
+                    'sim_priceShip' => $feeShip,
+                    'total_price' => $sim_product->get_price() + $goicuoc_product->get_price() + $feeShip,
+                    'sales_channel' => 'Esimdata',
+                    'status' => 0,
+                ];
+
+                $result = $wpdb->insert($table_name, $data);
+
+                if ($result === false) {
+                    throw new Exception('Insert failed.');
+                }
+
                 $order_inserted = true;
             }
         }
-    }
 
-    if ($order_inserted) {
+        $wpdb->query('COMMIT');
         wp_send_json_success('Insert successful.');
-    } else {
-        $error = $wpdb->last_error;
-        wp_send_json_error('Insert failed: ' . $error);
+    } catch (Exception $e) {
+        $wpdb->query('ROLLBACK');
+        wp_send_json_error('Transaction failed: ' . $e->getMessage());
     }
     wp_die();
 }
-
-
-
-
-
-
-
-
 
 
