@@ -115,9 +115,12 @@ function update_customer_order_info_html(){
             'sim_id' => sanitize_textarea_field($_POST['sim_id']),
             'sim_type' => sanitize_textarea_field($_POST['sim_type']),
             'user_id' => sanitize_textarea_field($_POST['user_id']),
-            'note' => sanitize_textarea_field($_POST['note']),
+            'user_note' => sanitize_textarea_field($_POST['user_note']),
             'status' => sanitize_textarea_field($_POST['order_status']),
-
+            'sim_priceShip'=>sanitize_textarea_field($_POST['sim_priceShip']),
+            'sim_price'=>sanitize_textarea_field($_POST['sim_price']),
+            'goicuoc_price'=>sanitize_textarea_field($_POST['goicuoc_price']),
+            'total_price'=>sanitize_textarea_field($_POST['total_price']),
 
         ); 
         var_dump($updated_order);
@@ -144,7 +147,11 @@ function update_customer_order_info_html(){
                 </tr>
                 <tr>
                     <th><label for="customer_add">Địa chỉ nhận hàng</label></th>
-                    <td><textarea rows="5" cols="30" class="regular-text" name="customer_add"><?php echo esc_attr($order->customer_add); ?></textarea>
+                    <td><textarea rows="3" cols="30" class="regular-text" name="customer_add"><?php echo esc_attr($order->customer_add); ?></textarea>
+                </tr>
+                <tr>
+                    <th><label for="note">Ghi chú của KH</label></th>
+                    <td><textarea rows="3" cols="30" class="regular-text" name="note"><?php echo esc_attr($order->note); ?></textarea>
                 </tr>
                 <tr>
                     <th><label for="customer_date">Ngày đặt hàng</label></th>
@@ -154,14 +161,14 @@ function update_customer_order_info_html(){
                     <th><label for="sim_id">Sim số đã chọn</label></th>
                     <td>
                         <?php 
-                            echo '<select name="sim_id" class="regular-text">';
+                            echo '<select name="sim_id" id="sim_id" class="regular-text">';
                             foreach ($sim_products as $product) {
                                 $sim_id = $product->get_id();
                                 $sim_name = $product->get_name();
                                 $sim_price = $product->get_price();
 
                                 $selected = ($sim_id == $order->sim_id) ? 'selected' : '';
-                                echo '<option value="' . esc_attr($sim_id) . '" ' . $selected . '>';
+                                echo '<option value="' . esc_attr($sim_id) . '" ' . $selected . ' data-sim-price="'.$sim_price.'">';
                                 echo esc_html($sim_name);
                                 echo " | Giá: ";
                                 echo wc_price($sim_price);
@@ -175,13 +182,13 @@ function update_customer_order_info_html(){
                     <th><label for="goicuoc_id">Gói cước</label></th>
                     <td>
                         <?php 
-                            echo '<select name="goicuoc_id" class="regular-text">';
+                            echo '<select name="goicuoc_id" id="goicuoc_id" class="regular-text">';
                             foreach ($goi_cuoc_variations as $product) {
                                 $goicuoc_id = $product->get_id();
                                 $goicuoc_name = $product->get_name();
                                 $goicuoc_price = $product->get_price();
                                 $selected = ($goicuoc_id == $order->goicuoc_id) ? 'selected' : '';
-                                echo '<option value="' . esc_attr($goicuoc_id) . '" ' . $selected . '>';
+                                echo '<option value="' . esc_attr($goicuoc_id) . '" ' . $selected . ' data-goicuoc-price="'.$goicuoc_price.'">';
                                 echo esc_html($goicuoc_name);
                                 echo " | Giá: ";
                                 echo wc_price($goicuoc_price);
@@ -203,20 +210,28 @@ function update_customer_order_info_html(){
                 </tr>
                 <tr>
                     <th><label for="sim_price">Giá sim</label></th>
-                    <td><?php echo number_format($order->sim_price, 0, ',', '.'); ?> VNĐ</td>
+                    <td>
+                        <span id="sim_price"><?php echo number_format($order->sim_price, 0, ',', '.'); ?></span>
+                        <input type="hidden" name="sim_price" id="sim_price_hidden" class="regular-text" value="<?php echo $order->sim_price?>"> VNĐ
+                    </td>
                 </tr>
                 
                 <tr>
                     <th><label for="goicuoc_price">Giá gói cước</label></th>
-                    <td><?php echo number_format($order->goicuoc_price, 0, ',', '.'); ?> VNĐ</td>
+                    <td>
+                        <span id="goicuoc_price"><?php echo number_format($order->goicuoc_price, 0, ',', '.'); ?></span>
+                        <input type="hidden" name="goicuoc_price" id="goicuoc_price_hidden" class="regular-text" value="<?php echo $order->goicuoc_price?>"> VNĐ 
+                    </td>
+                       
                 </tr>
                 <tr>
                     <th><label for="sim_priceShip">Tiền ship</label></th>
-                    <td><?php echo number_format($order->sim_priceShip, 0, ',', '.'); ?> VNĐ</td>
+                    <td><input name="sim_priceShip" id="sim_priceShip" type="number" value="<?php echo $order->sim_priceShip ?>" class="regular-text"> VNĐ</td>
                 </tr>
                 <tr>
                     <th><label for="total_price">Tổng thanh toán</label></th>
-                    <td><strong><?php echo number_format($order->total_price, 0, ',', '.'); ?> VNĐ</strong></td>
+                    <td><span id="total_price"><?php echo number_format($order->total_price, 0, ',', '.'); ?></span> 
+                        <input name="total_price" id="total_price_hidden" type="hidden" value="<?php echo $order->total_price ?>" class="regular-text"> VNĐ</td>
                 </tr>
                 <tr>
                     <th><label for="sales_channel">Kênh bán</label></th>
@@ -235,9 +250,9 @@ function update_customer_order_info_html(){
                     </td>
                 </tr>
                 <tr>
-                    <th><label for="note">Ghi chú</label></th>
+                    <th><label for="user_note">Ghi chú của nhân viên</label></th>
                     <td>
-                    <textarea rows="5" cols="30" id="order_note" name="note" class="regular-text"><?php echo esc_html($order->note); ?></textarea>
+                    <textarea rows="5" cols="30" id="user_note" name="user_note" class="regular-text"><?php echo esc_html($order->user_note); ?></textarea>
                     </td>
                 </tr>
                 <tr>

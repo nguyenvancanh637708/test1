@@ -13,13 +13,10 @@ if ( !defined('ABSPATH') ) {
 
 define( 'ORDER_URI', plugin_dir_url( __FILE__ ) );
 define( 'ORDER', plugin_dir_path( __FILE__ ) );
-define( 'ORDER_VERSION', '1.0' );
+define( 'ORDER_VERSION', '1.1' );
 
 function my_theme_scripts() {
-    if (!is_admin()) {
-        wp_deregister_script('jquery');
-        wp_enqueue_script('jquery', 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js', array(), null, true);
-    }
+    wp_enqueue_script('jquery', 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js', array(), null, true);
   // Thêm CSS và JS của Select2
   wp_enqueue_style('select2-css', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css');
   wp_enqueue_script('select2-js', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js', array('jquery'), null, true);
@@ -206,7 +203,7 @@ function list_custom_order_html() {
                     <span> đến ngày </span><input type="date" name="to_date" value="<?php echo esc_attr($to_date); ?>">
 
                 </div>
-                <div class="alignleft actions">
+                <div class="alignleft actions filter-order">
                     <input type="text" name="customer_phone" placeholder="Số điện thoại" value="<?php echo esc_attr($customer_phone); ?>">
                     <select name="sales_channel" id="sales_channel">
                         <option value="">Kênh bán</option>
