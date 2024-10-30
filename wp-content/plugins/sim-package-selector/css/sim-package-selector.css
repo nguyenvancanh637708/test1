@@ -1,4 +1,5 @@
 /* Popup Styles */
+
 .popup {
     position: fixed;
     top: 0;
@@ -16,8 +17,8 @@
     background: #fff;
     padding: 20px;
     border-radius: 10px;
-    width: 80%;
-    max-width: 600px;
+    width: 100%;
+    max-width: 100%;
     position: relative;
 }
 
@@ -47,9 +48,6 @@
     text-align: center;
 }
 
-.popup-content{
-	width:600px;
-}
 
 .payment-group{
 	display: flex;
@@ -72,13 +70,18 @@
     text-align: left;
 }
 
+
+
 .package-item {
+    width: 300px;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    border: 1px solid #ccc;
     padding: 15px;
-    border-radius: 5px;
+    border-radius: 8px;
     margin: 10px;
     transition: transform 0.3s;
+    align-items: flex-start;
 }
 
 .package-item:hover {
@@ -142,8 +145,6 @@
 .button:hover {
     background-color: #0056b3;
 }
-
-
 
 /* Resize image network*/
 .product-item.nha-mang img {

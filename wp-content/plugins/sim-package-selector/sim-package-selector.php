@@ -26,25 +26,28 @@ add_action('wp_enqueue_scripts', 'sim_package_selector_enqueue_scripts');
 function sim_package_selector_popup_html()
 {
 ?>
-    <div id="package-popup" style="display:none;">
-        <div class="popup-content">
-            <h2>Chọn gói cước</h2>
-            <div id="package-carousel" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-inner" id="carousel-items"></div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#package-carousel" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Previous</span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#package-carousel" data-bs-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Next</span>
-                </button>
-            </div>
-            <button class="button add-package">Thêm vào giỏ hàng</button>
-            <button class="button close-popup">Đóng</button>
-            <?php wp_nonce_field('sim_package_selector_nonce', 'sim_package_selector_nonce_field'); ?>
+<div id="package-popup" class="popup" style="display:none;">
+    <div class="popup-overlay"></div>
+    <div class="popup-content">
+        <button class="close-popup" aria-label="Close Popup" title="Đóng">✖</button>
+        <h2>Chọn gói cước</h2>
+        <div id="package-carousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner" id="carousel-items"></div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#package-carousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#package-carousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+        <div class="payment-group">
+        <button class="button add-package">Thêm vào giỏ hàng</button>
+        <button class="button proceed-to-checkout">Tiến hành thanh toán</button>
         </div>
     </div>
+</div>
 <?php
 }
 add_action('wp_footer', 'sim_package_selector_popup_html');
@@ -79,53 +82,67 @@ function get_packages_by_network()
 
     $query = new WP_Query($args);
     $carousel_items = '';
+    $items_per_slide = 3; // Số gói cước hiển thị cùng lúc
+    $counter = 0;
 
     if ($query->have_posts()) {
-        $first_item = true; // Để đánh dấu item đầu tiên
         while ($query->have_posts()) {
             $query->the_post();
             $product = wc_get_product(get_the_ID());
-
-            // Lấy mô tả sản phẩm
             $description = $product->get_description();
 
             // Kiểm tra xem sản phẩm có biến thể không
             if ($product->is_type('variable')) {
-                // Lấy tất cả các biến thể
                 $available_variations = $product->get_available_variations();
                 foreach ($available_variations as $variation) {
                     $variation_id = $variation['variation_id'];
                     $variation_name = implode(', ', array_map(function ($attr) {
                         return $attr;
                     }, $variation['attributes']));
-
                     $price = wc_price($variation['display_price']); // Lấy giá của biến thể
-                    $carousel_items .= '<div class="carousel-item ' . ($first_item ? 'active' : '') . '">
-                        <div class="package-item" data-id="' . $variation_id . '">
-                            <div class="package-details"> <!-- Khối chứa tên và mô tả -->
-                                <h5>' . $product->get_name() . ' - ' . $variation_name . ' (' . $price . ')</h5>
-                                <h5>Gói ' . $product->get_name() . '</h5>
-                                <h5>' . $price . '/ ' . $variation_name . '</h5>
 
-                                <p>' . wp_kses_post($description) . '</p> <!-- Hiển thị mô tả -->
-                            </div>
-                        </div>
+                    // Tạo HTML cho gói cước
+                    if ($counter % $items_per_slide === 0) {
+                        if ($counter > 0) {
+                            $carousel_items .= '</div></div>'; // Kết thúc item carousel trước đó
+                        }
+                        $carousel_items .= '<div class="carousel-item ' . ($counter === 0 ? 'active' : '') . '">
+                            <div class="d-flex justify-content-around">'; // Sử dụng flexbox để sắp xếp gói cước
+                    }
+
+                    $carousel_items .= '<div class="package-item" data-id="' . $variation_id . '">
+                        <h5>Gói ' . $product->get_name() . ' </h5>
+                        <h5>'  . $price . '/' . $variation_name . '</h5>
+                        <p>' . wp_kses_post($description) . '</p>
                     </div>';
-                    $first_item = false; // Đánh dấu item đầu tiên đã được thêm
+
+                    $counter++;
                 }
             } else {
                 $price = wc_price($product->get_price()); // Lấy giá của sản phẩm
-                $carousel_items .= '<div class="carousel-item ' . ($first_item ? 'active' : '') . '">
-                    <div class="package-item" data-id="' . get_the_ID() . '">
-                        <div class="package-details"> <!-- Khối chứa tên và mô tả -->
-                            <h5>' . get_the_title() . ' (' . $price . ')</h5>
-                            <p>' . wp_kses_post($description) . '</p> <!-- Hiển thị mô tả -->
-                        </div>
-                    </div>
+                if ($counter % $items_per_slide === 0) {
+                    if ($counter > 0) {
+                        $carousel_items .= '</div></div>'; // Kết thúc item carousel trước đó
+                    }
+                    $carousel_items .= '<div class="carousel-item ' . ($counter === 0 ? 'active' : '') . '">
+                        <div class="d-flex justify-content-around">'; // Sử dụng flexbox để sắp xếp gói cước
+                }
+
+                $carousel_items .= '<div class="package-item" data-id="' . get_the_ID() . '">
+                    <h5>' . get_the_title() . ' (' . $price . ')</h5>
+                    <p>' . wp_kses_post($description) . '</p>
                 </div>';
-                $first_item = false; // Đánh dấu item đầu tiên đã được thêm
+
+                $counter++;
             }
         }
+
+        // Kết thúc item carousel cuối cùng
+        if ($counter > 0) {
+            $carousel_items .= '</div></div>'; 
+        }
+
+        $carousel_items .= '</div>'; // Kết thúc carousel-inner
         wp_reset_postdata();
     } else {
         $carousel_items = '<div class="carousel-item active"><h5>Không có gói cước nào</h5></div>';
@@ -134,9 +151,6 @@ function get_packages_by_network()
     echo $carousel_items;
     wp_die();
 }
-
-
-
 
 // Xử lý AJAX thêm gói cước vào giỏ hàng
 add_action('wp_ajax_add_to_cart', 'ajax_add_to_cart');
