@@ -188,7 +188,16 @@ function ds_kh_dat_sim_page() {
                                 <td><?php echo number_format($order->goicuoc_price, 0, ',', '.'); ?></td>
                                 <td><strong><?php echo number_format($order->total_price, 0, ',', '.'); ?></strong></td>
                                 <td><?php echo esc_html($order->sales_channel); ?></td>
-                                <td><?php echo get_user_by('ID', $order->user_id)->display_name;?></td>
+                                <td>
+                                    <?php
+                                    $user = get_user_by('ID', $order->user_id);
+                                    if ($user) {
+                                        echo esc_html($user->display_name);
+                                    } else {
+                                        echo 'N/A'; // or any fallback message, like "User not found"
+                                    }
+                                    ?>
+                                </td>
                                 <td><?php echo esc_html($order->note); ?></td>
                                 <td><?php 
                                 if($order->status==0){
