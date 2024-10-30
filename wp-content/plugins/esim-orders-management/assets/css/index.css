@@ -1,3 +1,24 @@
+.btn-submit-cus{
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+.custom-spinner {
+    display: inline-block; /* Allows width and height */
+    width: 1rem; /* Adjust the size as needed */
+    height: 1rem; /* Adjust the size as needed */
+    border: 3px solid rgba(0, 0, 0, 0.3); /* Background circle */
+    border-top: 3px solid #3498db; /* Color of the spinning part */
+    border-radius: 50%; /* Make it circular */
+    animation: spin 0.6s linear infinite; /* Spin animation */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); } /* Start position */
+    100% { transform: rotate(360deg); } /* End position */
+}
+
 .name-item{
     font-weight: bold;
     color: #0073aa !important;
@@ -65,4 +86,45 @@
     color: #fff; 
     border-color: #0073aa; 
     pointer-events: none;
+}
+
+.nav-filter{
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.5em 0.75em;
+    font-size: 0.875em;
+    font-weight: 700;
+    color: #fff;
+    border-radius: 0.25rem;
+}
+
+.badge-success {
+    background-color: #28a745; /* Màu xanh lá cây */
+}
+
+.badge-warning {
+    background-color: #ffc107; /* Màu vàng */
+}
+
+.badge-info {
+    background-color: #17a2b8; /* Màu xanh lam */
+}
+
+.badge-danger {
+    background-color: #dc3545; /* Màu đỏ */
+}
+
+.badge-primary {
+    background-color: #007bff; /* Màu xanh dương */
+}
+
+.badge-secondary {
+    background-color: #6c757d; /* Màu xám */
 }
