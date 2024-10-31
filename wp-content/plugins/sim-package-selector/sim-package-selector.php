@@ -43,8 +43,8 @@ function sim_package_selector_popup_html()
             </button>
         </div>
         <div class="payment-group">
-        <button class="button add-package">Thêm vào giỏ hàng</button>
-        <button class="button proceed-to-checkout">Tiến hành thanh toán</button>
+            <button class="button add-package">Thêm vào giỏ hàng</button>
+            <button class="button proceed-to-checkout">Tiến hành thanh toán</button>
         </div>
     </div>
 </div>
@@ -52,7 +52,7 @@ function sim_package_selector_popup_html()
 }
 add_action('wp_footer', 'sim_package_selector_popup_html');
 
-// Xử lý AJAX lấy gói cước theo nhà mạng và các biến thể
+// Xử lý AJAX lấy gói cước theo nhà mạng
 add_action('wp_ajax_get_packages_by_network', 'get_packages_by_network');
 add_action('wp_ajax_nopriv_get_packages_by_network', 'get_packages_by_network');
 
@@ -100,6 +100,13 @@ function get_packages_by_network()
                         return $attr;
                     }, $variation['attributes']));
                     $price = wc_price($variation['display_price']); // Lấy giá của biến thể
+                    // Chuyển đổi "-thang" thành " tháng" và quy đổi tháng sang ngày
+                    $variation_name = str_replace('-thang', ' tháng', $variation_name);
+                    if (preg_match('/(\d+) tháng/', $variation_name, $matches)) {
+                        $month_value = intval($matches[1]); // Lấy số tháng
+                        $days = $month_value * 30; // Quy đổi tháng sang ngày
+                        $variation_name = "$days ngày"; // Cập nhật tên biến thể
+                    }
 
                     // Tạo HTML cho gói cước
                     if ($counter % $items_per_slide === 0) {

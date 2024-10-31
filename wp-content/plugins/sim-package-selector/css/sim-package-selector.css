@@ -1,4 +1,8 @@
 /* Popup Styles */
+.package-item.selected {
+    border: 2px solid #007bff; /* Màu sắc khi gói cước được chọn */
+    background-color: #f0f8ff; /* Màu nền khi gói cước được chọn */
+}
 
 .popup {
     position: fixed;
@@ -18,7 +22,7 @@
     padding: 20px;
     border-radius: 10px;
     width: 100%;
-    max-width: 100%;
+    max-width: 1000px;
     position: relative;
 }
 
@@ -88,12 +92,19 @@
     transform: scale(1.05);
     border-color: #007bff; /* Màu sắc khi hover */
 }
+.add-package {
+    border: 1px solid #D2D5DF !important;
+    background-color: #fff !important;
+    color: #344051 !important;
+    border-radius: 8px !important;
+    line-height: 24px;
+}
 
 /* Carousel Control Styles */
 .carousel-control-prev,
 .carousel-control-next {
     filter: invert(1); /* Đổi màu icon sang trắng */
-    background: none !important; /* Xóa nền khi hover */
+    background: none !important; /* Xóa nền khi hover    */
 }
 
 .carousel-control-prev:hover,
@@ -169,5 +180,3 @@
     justify-content: center;
     align-items: center;
 }
-
-

@@ -26,9 +26,15 @@ jQuery(document).ready(function($) {
         $('#package-popup').fadeOut();
     });
 
-    // Thêm biến thể vào giỏ hàng
+    // Thêm sự kiện click cho từng gói cước
+    $(document).on('click', '.package-item', function() {
+        $('.package-item').removeClass('selected'); // Xóa lớp selected khỏi tất cả gói cước
+        $(this).addClass('selected'); // Thêm lớp selected cho gói cước được chọn
+    });
+
+    // Thêm gói cước vào giỏ hàng
     $('.add-package').click(function() {
-        var selectedVariationId = $('#carousel-items .carousel-item.active .package-item').data('id');
+        var selectedVariationId = $('.package-item.selected').data('id');
         var productId = $('#package-popup').data('product-id');
         var phoneNumber = $('#package-popup').data('phone-number');
 
@@ -39,13 +45,12 @@ jQuery(document).ready(function($) {
                 type: 'POST',
                 data: {
                     action: 'add_to_cart',
-                    product_id: selectedVariationId,
-                    sim_package_selector_nonce_field: $('#package-popup').find('input[name="sim_package_selector_nonce_field"]').val() // Gửi nonce
+                    product_id: selectedVariationId
                 },
                 success: function() {
                     // Thêm sản phẩm SIM vào giỏ hàng với số điện thoại
                     $.ajax({
-                        url: wc_add_to_cart_params.ajax_url,
+                        url: ajaxurl,
                         type: 'POST',
                         data: {
                             action: 'add_to_cart',
@@ -53,7 +58,7 @@ jQuery(document).ready(function($) {
                             phone_number: phoneNumber
                         },
                         success: function() {
-                            alert('Biến thể và SIM đã được thêm vào giỏ hàng.');
+                            alert('Gói cước và SIM đã được thêm vào giỏ hàng.');
                             $('#package-popup').fadeOut();
                         }
                     });

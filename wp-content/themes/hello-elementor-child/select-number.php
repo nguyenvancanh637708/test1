@@ -390,6 +390,17 @@ $query = new WP_Query($args);
                 document.getElementById('package-popup').style.display = 'flex';
                 document.getElementById('package-popup').dataset.productId = productId;
                 document.getElementById('package-popup').dataset.phoneNumber = phoneNumber;
+
+                // Thêm sự kiện click cho từng gói cước
+                const packageItems = document.querySelectorAll('.package-item');
+                packageItems.forEach(item => {
+                    item.addEventListener('click', function() {
+                        // Xóa lớp active khỏi tất cả gói cước
+                        packageItems.forEach(i => i.classList.remove('active'));
+                        // Thêm lớp active cho gói cước được chọn
+                        this.classList.add('active');
+                    });
+                });
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -404,7 +415,7 @@ $query = new WP_Query($args);
 
     // Thêm gói cước vào giỏ hàng
     document.querySelector('.add-package').addEventListener('click', function() {
-        const selectedPackageId = document.querySelector('#carousel-items .carousel-item.active .package-item').dataset.id;
+        const selectedPackageId = document.querySelector('#carousel-items .carousel-item.active .package-item.active').dataset.id;
         const productId = document.getElementById('package-popup').dataset.productId;
         const phoneNumber = document.getElementById('package-popup').dataset.phoneNumber;
 
@@ -457,10 +468,11 @@ $query = new WP_Query($args);
         }
     });
 
-        document.getElementById('filter-fast').addEventListener('change', function() {
-            this.submit();
-        });
+    document.getElementById('filter-fast').addEventListener('change', function() {
+        this.submit();
     });
+});
+
 </script>
 
 <div id="package-popup" class="popup" style="display:none;">
