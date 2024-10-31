@@ -7,7 +7,7 @@ function create_esim_tables() {
     $orders_table = $wpdb->prefix . 'esim_orders'; // bảng KH đặt sim
     $order_data_table = $wpdb->prefix . 'esim_order_data'; // Bảng đơn hàng
     $log_sync_table = $wpdb->prefix . 'esim_order_data_sync'; // bảng lịch sử đồng bộ
-    $table_name = $wpdb->prefix . 'adminesim_api_keys'; // lưu key api
+    $api_keys_table = $wpdb->prefix . 'esim_api_keys'; // lưu key api
 
     $sql_orders = "CREATE TABLE IF NOT EXISTS $orders_table (
         id int(20) NOT NULL AUTO_INCREMENT,
@@ -67,13 +67,13 @@ function create_esim_tables() {
         landing_id INT(20) NOT NULL,
         wp_order_id INT(20) DEFAULT NULL,  
         synced_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        action TEXT DEFAULT NOT NULL,
+        action TEXT NOT NULL,
         status VARCHAR(50) NOT NULL,
         response TEXT DEFAULT NULL,
         PRIMARY KEY (id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
 
-    $sql_api_key = "CREATE TABLE IF NOT EXISTS $table_name (
+    $sql_api_key = "CREATE TABLE IF NOT EXISTS $api_keys_table (
         id INT(20) NOT NULL AUTO_INCREMENT,
         api_key VARCHAR(64) NOT NULL,
         created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
