@@ -1,5 +1,4 @@
 <?php
-// Prevent direct access
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -36,7 +35,6 @@ function create_order_handler() {
     $order_status = sanitize_text_field($orderData['order_status']);
     $created_by = sanitize_email($orderData['created_by']);
 
-    // Tạo mã vận đơn
     $mvd = getUniqueTrackingNumber($order_id);
 
     $data = array(
@@ -87,36 +85,31 @@ add_action('wp_ajax_update_order_esim', 'update_order_esim_callback');
 add_action('wp_ajax_nopriv_update_order_esim', 'update_order_esim_callback'); // Nếu cần cho người dùng không đăng nhập
 
 function update_order_esim_callback() {
-    // Kiểm tra nonce
     if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'update_order_esim')) {
         wp_send_json_error(['message' => 'Nonce không hợp lệ.']);
         wp_die();
     }
 
-    // Kiểm tra dữ liệu được gửi
     if (isset($_POST['orderData'])) {
-        global $wpdb; // Khai báo global $wpdb để sử dụng truy vấn
+        global $wpdb; 
 
         $order_data = $_POST['orderData'];
 
-        // Lấy thông tin đơn hàng từ ID
         $order_id = intval($order_data['id']);
         $created_date = sanitize_text_field($order_data['created_date']);
         $payment_method = sanitize_text_field($order_data['payment_method']);
         $order_status = sanitize_text_field($order_data['order_status']);
 
-        // Cập nhật bản ghi trong bảng wp_esim_order_data
         $updated = $wpdb->update(
-            'wp_esim_order_data', // Tên bảng
+            'wp_esim_order_data', 
             [
                 'created_date' => $created_date,
                 'payment_method' => $payment_method,
                 'status' => $order_status,
             ],
-            ['id' => $order_id] // Điều kiện cập nhật
+            ['id' => $order_id] 
         );
 
-        // Kiểm tra kết quả cập nhật
         if ($updated !== false) {
             wp_send_json_success(['message' => 'Cập nhật thành công!']);
         } else {

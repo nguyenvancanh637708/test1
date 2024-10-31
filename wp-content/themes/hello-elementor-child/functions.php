@@ -45,6 +45,7 @@ function handle_checkout_payment() {
     $table_name = 'wp_esim_orders';
     $order_inserted = false;
     $feeShip = 0;
+    $codes=[];
 
     $wpdb->query('START TRANSACTION');
     try {
@@ -70,8 +71,15 @@ function handle_checkout_payment() {
                     wp_die();
                 }
 
-                // Prepare data to insert
+                 $code_request = generate_code_request();
+                 while ($wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE code_request = %s", $code_request)) > 0) {
+                     $code_request = generate_code_request();
+                 }
+
+                $codes[] = $code_request;
+
                 $data = [
+                    'code_request' => $code_request, 
                     'customer_name' => $customer_name,
                     'customer_phone' => $customer_phone,
                     'customer_add' => $detailed_address . ', ' . $ward . ', ' . $district . ', ' . $province,
@@ -90,20 +98,17 @@ function handle_checkout_payment() {
                     'note' => $notes,
                 ];
 
-                // Insert data
                 $result = $wpdb->insert($table_name, $data);
 
                 if ($result === false) {
                     throw new Exception('Insert failed.');
                 }
-
                 $order_inserted = true;
             }
         }
-
-        // Commit transaction if all inserts are successful
         $wpdb->query('COMMIT');
-        wp_send_json_success('Insert successful.');
+        // wp_send_json_success('Insert successful.');
+        wp_send_json_success($codes); 
     } catch (Exception $e) {
         // Rollback transaction in case of error
         $wpdb->query('ROLLBACK');
@@ -111,6 +116,14 @@ function handle_checkout_payment() {
     }
     wp_die();
 }
+
+function generate_code_request() {
+    $date = date('dmY');
+
+    $random_string = substr(str_shuffle('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 3);
+    return $date . $random_string;
+}
+
 
 
 

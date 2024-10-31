@@ -358,12 +358,20 @@ get_header();
             data: formData,
             success: function(response) {
                 if(response.success) {
-                    alert(response.data); 
-                    // todo: redirect page to thankyou or the same
+                    const codes = response.data;
+                    var redirectUrl = "<?php echo site_url('thank-you'); ?>?";
+                    codes.forEach(function(code, index) {
+                        redirectUrl += 'code[' + index + ']=' + encodeURIComponent(code) + '&'; 
+                    });
+                    redirectUrl = redirectUrl.slice(0, -1); 
+                    redirectUrl = encodeURI(redirectUrl);
+                    window.location.href = redirectUrl; 
                 } else {
                     alert(response.data);
+                    toggleLoading(btn, false);
+
                 }
-                toggleLoading(btn, false);
+
             },
             error: function(error) {
                 alert("Có lỗi xảy ra!");

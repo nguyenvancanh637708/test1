@@ -30,12 +30,12 @@ function my_theme_scripts() {
      // Khởi tạo Select2 cho #sales_channel
      wp_add_inline_script('select2-js', "
      jQuery(document).ready(function($) {
-         $('#goicuoc_id').select2({
+         $('#goicuoc_ids').select2({
              allowClear: true,
              placeholder: 'Loại gói cước',
          });
 
-         $('#user_id').select2({
+         $('#user_ids').select2({
              allowClear: true,
              placeholder: 'Nhân viên tư vấn',
          });
@@ -51,7 +51,8 @@ function my_theme_scripts() {
 add_action('wp_enqueue_scripts', 'my_theme_scripts');
 add_action('admin_enqueue_scripts', 'my_theme_scripts'); 
 
-require_once plugin_dir_path(__FILE__) . 'class-custom-order-list-table.php';
+require_once plugin_dir_path(__FILE__) . 'wp-tables/class-custom-order-list-table.php';
+require_once plugin_dir_path(__FILE__) . 'wp-tables/class-custom-customer-list-table.php';
 
 require_once plugin_dir_path(__FILE__) . 'includes/page-kh-dat-sim.php';
 require_once plugin_dir_path(__FILE__) . 'includes/page-edit-kh-dat-sim.php';

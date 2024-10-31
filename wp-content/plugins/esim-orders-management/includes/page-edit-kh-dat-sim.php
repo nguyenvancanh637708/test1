@@ -175,7 +175,7 @@ function display_order_form($order, $sim_products, $goi_cuoc_variations, $users,
     $current_user = wp_get_current_user();
     ?>
     <div class="wrap">
-        <h1 class="wp-heading-inline">Chỉnh sửa danh sách đặt hàng </h1>
+        <h1 class="wp-heading-inline">Chỉnh sửa yêu cầu đặt SIM <strong>#<?php echo $order->code_request?></strong> </h1>
         <?php 
             if ($order->status == 1) {
             ?>

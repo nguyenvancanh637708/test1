@@ -34,17 +34,12 @@ class Custom_Order_List_Table extends WP_List_Table {
         $columns  = $this->get_columns();
         $hidden   = [];
         $sortable = $this->get_sortable_columns();
-
         $this->_column_headers = [$columns, $hidden, $sortable];
-        
-        // Lấy dữ liệu đơn hàng
         $data = $this->get_order_data();
 
-        $per_page = 10;
+        $per_page = 20;
         $current_page = $this->get_pagenum();
         $total_items = count($data);
-
-        // Chia trang
         $this->items = array_slice($data, (($current_page - 1) * $per_page), $per_page);
         
         $this->set_pagination_args([
@@ -109,8 +104,7 @@ class Custom_Order_List_Table extends WP_List_Table {
         $orderby = isset($_GET['orderby']) ? sanitize_text_field($_GET['orderby']) : 'created_date';
         $order = isset($_GET['order']) && in_array($_GET['order'], ['asc', 'desc']) ? $_GET['order'] : 'desc';
         
-        $query .= " ORDER BY $orderby $order"; // Add sorting
-        // Fetch results
+        $query .= " ORDER BY $orderby $order"; 
         $results = $wpdb->get_results($query, ARRAY_A);
         $data = [];
         
@@ -184,14 +178,12 @@ class Custom_Order_List_Table extends WP_List_Table {
             case 'package_name':
             case 'qty':
             case 'channel':
-
-                return esc_html($item[$column_name]); // Trả về giá trị cho từng cột
             case 'total_amount':
-                return esc_html($item['total_amount']); // Trả về tổng tiền đã tính
+                return esc_html($item[$column_name]); 
             case 'status':
-                return $item['status']; // Đã lấy trạng thái từ get_order_data
+                return $item['status']; 
             default:
-                return print_r($item, true); // Debugging
+                return print_r($item, true); 
         }
     }
     
@@ -199,7 +191,7 @@ class Custom_Order_List_Table extends WP_List_Table {
         return [
             'ma_van_don'     => ['ma_van_don', false],
             'created_date'   => ['created_date', false],
-            'total_amount'          => ['total_amount', false], // Cột tổng tiền có thể sắp xếp
+            'total_amount'          => ['total_amount', false], 
         ];
     }
 }
