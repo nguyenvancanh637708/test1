@@ -9,14 +9,13 @@ $codes = isset($_GET['code']) ? (array) $_GET['code'] : [];
 if (!empty($codes)) {
     $placeholders = implode(',', array_fill(0, count($codes), '%s')); 
     // Mã hóa code để không bị hack
-    $query = $wpdb->prepare("SELECT * FROM wp_esim_orders WHERE code_request IN ($placeholders)", $codes);
+    $query = $wpdb->prepare("SELECT * FROM " . $wpdb->prefix . "esim_orders WHERE code_request IN ($placeholders)", $codes);
     $results = $wpdb->get_results($query, ARRAY_A);
 
-     if (count($results) < count($codes)) {
+    if (count($results) < count($codes)) {
         echo '<div class="error-message">Không tồn tại yêu cầu đặt hàng nào với mã đã cung cấp.</div>';
         die(); // Dừng thực thi
     }
-
 } else {
     echo '<div class="error-message">Không có mã yêu cầu nào được cung cấp.</div>';
     die();
@@ -27,31 +26,28 @@ $status_class = '';
 $status_text = '';
 
 if ($results) {
-    foreach ($results as $result) {
-        $status = $result['status']; // Lấy trạng thái từ từng đơn hàng
-        switch ($status) {
-            case 0:
-                $status_text .= 'Chờ xử lý, '; // Thêm trạng thái cho đơn hàng
-                $status_class .= 'status-pending '; // Thêm lớp cho trạng thái "Chờ xử lý"
-                break;
-            case 1:
-                $status_text .= 'Thành công, '; // Thêm trạng thái cho đơn hàng
-                $status_class .= 'status-success '; // Thêm lớp cho trạng thái "Thành công"
-                break;
-            case -1:
-                $status_text .= 'Thất bại, '; // Thêm trạng thái cho đơn hàng
-                $status_class .= 'status-failed '; // Thêm lớp cho trạng thái "Thất bại"
-                break;
-            default:
-                $status_text .= 'Không xác định, '; // Thêm trạng thái cho đơn hàng
-                $status_class .= 'status-unknown '; // Thêm lớp cho trạng thái không xác định
-        }
+    $status = $result[0]['status']; // Lấy trạng thái từ từng đơn hàng
+    switch ($status) {
+        case 0:
+            $status_text .= 'Chờ xử lý, '; // Thêm trạng thái cho đơn hàng
+            $status_class .= 'status-pending '; // Thêm lớp cho trạng thái "Chờ xử lý"
+            break;
+        case 1:
+            $status_text .= 'Thành công, '; // Thêm trạng thái cho đơn hàng
+            $status_class .= 'status-success '; // Thêm lớp cho trạng thái "Thành công"
+            break;
+        case -1:
+            $status_text .= 'Thất bại, '; // Thêm trạng thái cho đơn hàng
+            $status_class .= 'status-failed '; // Thêm lớp cho trạng thái "Thất bại"
+            break;
+        default:
+            $status_text .= 'Không xác định, '; // Thêm trạng thái cho đơn hàng
+            $status_class .= 'status-unknown '; // Thêm lớp cho trạng thái không xác định
     }
 
     // Xóa dấu phẩy và khoảng trắng thừa ở cuối
     $status_text = rtrim($status_text, ', ');
     $status_class = rtrim($status_class);
-
 } 
 ?>
 

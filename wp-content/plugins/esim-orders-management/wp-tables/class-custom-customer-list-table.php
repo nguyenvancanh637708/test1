@@ -58,7 +58,7 @@ class Custom_Customer_List_Table extends WP_List_Table {
 
     function get_order_data() {
         global $wpdb;
-        $table_name = 'wp_esim_orders';
+        $table_name = $wpdb->prefix . 'esim_orders';
         $query = "SELECT * FROM $table_name WHERE 1=1";
         $params = []; 
     
@@ -180,7 +180,7 @@ class Custom_Customer_List_Table extends WP_List_Table {
 
     function get_link_esim_order_data($id) {
         global $wpdb;
-        $table_name = 'wp_esim_order_data';
+        $table_name = $wpdb->prefix . 'esim_order_data';
         $order_data = $wpdb->get_row($wpdb->prepare("SELECT id, ma_van_don FROM $table_name WHERE id = %d", $id), ARRAY_A);
     
         if ($order_data) {

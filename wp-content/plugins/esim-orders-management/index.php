@@ -11,9 +11,15 @@ if ( !defined('ABSPATH') ) {
     exit; // Exit if accessed directly.
 }
 
+require_once plugin_dir_path(__FILE__) . 'wp-tables/create-table-db.php';
+register_activation_hook(__FILE__, 'create_esim_tables');
+
+
 define( 'ORDER_URI', plugin_dir_url( __FILE__ ) );
 define( 'ORDER', plugin_dir_path( __FILE__ ) );
 define( 'ORDER_VERSION', '1.1' );
+
+
 
 function my_theme_scripts() {
     wp_enqueue_script('jquery', 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js', array(), null, true);
@@ -51,8 +57,11 @@ function my_theme_scripts() {
 add_action('wp_enqueue_scripts', 'my_theme_scripts');
 add_action('admin_enqueue_scripts', 'my_theme_scripts'); 
 
+require_once plugin_dir_path(__FILE__) . 'api-sync.php';
+
 require_once plugin_dir_path(__FILE__) . 'wp-tables/class-custom-order-list-table.php';
 require_once plugin_dir_path(__FILE__) . 'wp-tables/class-custom-customer-list-table.php';
+require_once plugin_dir_path(__FILE__) . 'wp-tables/class-custom-history-sync-table.php';
 
 require_once plugin_dir_path(__FILE__) . 'includes/page-kh-dat-sim.php';
 require_once plugin_dir_path(__FILE__) . 'includes/page-edit-kh-dat-sim.php';
@@ -60,6 +69,10 @@ require_once plugin_dir_path(__FILE__) . 'includes/ajax-handlers.php';
 
 require_once plugin_dir_path(__FILE__) . 'includes/page-don-hang.php';
 require_once plugin_dir_path(__FILE__) . 'includes/page-edit-don-hang.php';
+
+require_once plugin_dir_path(__FILE__) . 'includes/page-api-keys.php';
+require_once plugin_dir_path(__FILE__) . 'includes/page-history-sync.php';
+
 
 
 
@@ -111,6 +124,23 @@ function my_custom_menu_page() {
         'manage_options',                     // Quyền truy cập
         'edit-don-hang',                   // Định danh submenu
         'edit_don_hang_page'               // Hàm để hiển thị nội dung chỉnh sửa
+    );
+    add_submenu_page(
+        'ds-kh-dat-sim',                     // Định danh menu chính
+        'Quản lý API KEY',              // Tên submenu
+        'Quản lý API KEY',                         // Tiêu đề hiển thị trên trang admin
+        'manage_options',      
+        'esim-api-keys',     // Slug menu
+        'esim_api_keys_page' // Hàm gọi để hiển thị nội dung
+    );
+
+    add_submenu_page(
+        'ds-kh-dat-sim',                     // Định danh menu chính
+        'Lịch sử đồng bộ',              // Tên submenu
+        'Lịch sử đồng bộ',                         // Tiêu đề hiển thị trên trang admin
+        'manage_options',      
+        'history-sync',     // Slug menu
+        'esim_sync_history_page' // Hàm gọi để hiển thị nội dung
     );
 }
 add_action('admin_menu', 'my_custom_menu_page');

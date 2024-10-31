@@ -2,7 +2,7 @@
 
 function edit_don_hang_page() {
     global $wpdb;
-
+    $table_name = $wpdb->prefix . 'esim_order_data';
     // Lấy ID đơn hàng từ URL
     $order_id = isset($_GET['order_id']) ? intval($_GET['order_id']) : 0;
     
@@ -13,7 +13,7 @@ function edit_don_hang_page() {
     }
 
     // Lấy thông tin đơn hàng từ database
-    $order = $wpdb->get_row($wpdb->prepare("SELECT * FROM wp_esim_order_data WHERE id = %d", $order_id));
+    $order = $wpdb->get_row($wpdb->prepare("SELECT * FROM " .$table_name ." WHERE id = %d", $order_id));
 
     // Nếu không tìm thấy đơn hàng, thông báo lỗi
     if (!$order) {
@@ -109,11 +109,11 @@ function edit_don_hang_page() {
                     <select name="order_status" id="order_status" class="regular-text">
                         <?php 
                              $statuses = [
-                                 'waiting_for_delivery' => 'Chờ giao',
-                                 'shipped' => 'Đã giao',
-                                 'success' => 'Thành công',
-                                 'failed' => 'Thất bại',
-                                'received_payment' => 'Đã nhận tiền'
+                                1 => 'Thành công',            
+                                0 => 'Chờ giao',              
+                                3 => 'Đã giao',               
+                                2 => 'Thất bại',              
+                                4 => 'Đã nhận tiền'           
                             ];
                             foreach ($statuses as $value => $label) {
                                 $selected = ($order->status === $value) ? 'selected' : '';

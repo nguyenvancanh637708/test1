@@ -51,7 +51,8 @@ class Custom_Order_List_Table extends WP_List_Table {
 
     function get_order_data() {
         global $wpdb;
-        $table_name = 'wp_esim_order_data'; 
+        $table_name = $wpdb->prefix . 'esim_order_data';
+
         $query = "SELECT * FROM $table_name WHERE 1=1"; 
     
         // Filter by order status
@@ -137,28 +138,29 @@ class Custom_Order_List_Table extends WP_List_Table {
         $status_display = '';
         
         switch ($status) {
-            case 'success':
-                $status_display = '<span class="badge badge-success">Thành công</span>';
-                break;
-            case 'waiting_for_delivery':
+            case 0: // Chờ giao
                 $status_display = '<span class="badge badge-warning">Chờ giao</span>';
                 break;
-            case 'shipped':
-                $status_display = '<span class="badge badge-info">Đã giao</span>';
+            case 1: // Thành công
+                $status_display = '<span class="badge badge-success">Thành công</span>';
                 break;
-            case 'failed':
+            case 2: // Thất bại
                 $status_display = '<span class="badge badge-danger">Thất bại</span>';
                 break;
-            case 'received_payment':
+            case 3: // Đã ship
+                $status_display = '<span class="badge badge-info">Đã giao</span>';
+                break;
+            case 4: // Đã nhận tiền
                 $status_display = '<span class="badge badge-primary">Đã nhận tiền</span>';
                 break;
-            default:
+            default: // Không xác định
                 $status_display = '<span class="badge badge-secondary">Không xác định</span>';
                 break;
         }
     
         return $status_display;
     }
+    
 
     function column_cb($item) {
         return sprintf('<input type="checkbox" name="order[]" value="%s" />', esc_attr($item['ma_van_don']));

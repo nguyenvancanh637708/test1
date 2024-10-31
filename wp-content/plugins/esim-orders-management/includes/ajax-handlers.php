@@ -50,6 +50,7 @@ function create_order_handler() {
         'sim_price' => $sim_price,
         'goicuoc_price' => $goicuoc_price,
         'feeShip' => $sim_priceShip,
+        'total_amount' => $sim_price + $goicuoc_price + $sim_priceShip,
         'channel' => $channel,
         'status' => $order_status,
         'created_by' => $created_by,
@@ -58,11 +59,11 @@ function create_order_handler() {
     global $wpdb;
 
     $wpdb->query('START TRANSACTION');
-    $inserted = $wpdb->insert('wp_esim_order_data', $data);
+    $inserted = $wpdb->insert($wpdb->prefix . 'esim_order_data', $data);
     if ($inserted) {
         $order_data_id = $wpdb->insert_id; 
         $updated = $wpdb->update(
-            'wp_esim_orders',
+            $wpdb->prefix . 'esim_orders',
             array('order_data_id' => $order_data_id),
             array('id' => $order_id) 
         );
@@ -92,16 +93,14 @@ function update_order_esim_callback() {
 
     if (isset($_POST['orderData'])) {
         global $wpdb; 
-
         $order_data = $_POST['orderData'];
-
         $order_id = intval($order_data['id']);
         $created_date = sanitize_text_field($order_data['created_date']);
         $payment_method = sanitize_text_field($order_data['payment_method']);
         $order_status = sanitize_text_field($order_data['order_status']);
 
         $updated = $wpdb->update(
-            'wp_esim_order_data', 
+            $wpdb->prefix . 'esim_order_data', 
             [
                 'created_date' => $created_date,
                 'payment_method' => $payment_method,
@@ -139,12 +138,13 @@ function getUniqueTrackingNumber($order_id) {
     do {
         $mvd = generateTrackingNumber($order_id);
         $existing_mvd_count = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM wp_esim_order_data WHERE ma_van_don = %s",
+            "SELECT COUNT(*) FROM " . $wpdb->prefix . "esim_order_data WHERE ma_van_don = %s",
             $mvd
         ));
     } while ($existing_mvd_count > 0);
 
     return $mvd;
 }
+
 
 

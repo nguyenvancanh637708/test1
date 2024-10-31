@@ -42,7 +42,8 @@ function handle_checkout_payment() {
         wp_die();
     }
 
-    $table_name = 'wp_esim_orders';
+    $table_name = $wpdb->prefix . 'esim_orders';
+
     $order_inserted = false;
     $feeShip = 0;
     $codes=[];

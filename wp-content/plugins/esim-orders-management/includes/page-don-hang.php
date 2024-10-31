@@ -58,12 +58,13 @@ function ds_don_hang_page() {
     // Custom filter for order status
     $statuses = [
         '' => 'Tất cả trạng thái',
-        'success' => 'Thành công',
-        'waiting_for_delivery' => 'Chờ giao',
-        'shipped' => 'Đã giao',
-        'failed' => 'Thất bại',
-        'received_payment' => 'Đã nhận tiền'
+        1 => 'Thành công',            
+        0 => 'Chờ giao',              
+        3 => 'Đã giao',               
+        2 => 'Thất bại',              
+        4 => 'Đã nhận tiền'           
     ];
+    
 
     echo '<select name="order_status">';
     foreach ($statuses as $value => $label) {

@@ -1,20 +1,21 @@
 <?php
 function edit_kh_dat_sim_page() {
     global $wpdb;
-    $table_name = 'wp_esim_orders';
+    $table_name = $wpdb->prefix . 'esim_orders';
     $order_id = isset($_GET['order_id']) ? intval($_GET['order_id']) : 0;
 
     $order = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $order_id));
 
     if (!$order) {
-        echo '<div class="wrap"><h1 class="wp-heading-inline">Đơn hàng không tồn tại</h1></div>';
+        echo '<div class="error"><p>Đơn hàng không tồn tại.</p></div>';
         return;
     }
 
     $sim = wc_get_product($order->sim_id);
     $afc_nha_mang = $sim ? $sim->get_meta('nha_mang') : '';
     $goi_cuoc = wc_get_product($order->goicuoc_id);
-    $disabled_form = $order->order_data_id != NULL;
+    $disabled_form = $order->status == 1;
+    // $disabled_form = $order->order_data_id != NULL;
 
     if ($afc_nha_mang) {
         if($disabled_form == false){
@@ -38,7 +39,7 @@ function edit_kh_dat_sim_page() {
     }
 
     $users = get_users();
-    display_order_form($order, $sim_products, $goi_cuoc_variations, $users, $afc_nha_mang);
+    display_order_form($order, $sim_products, $goi_cuoc_variations, $users, $afc_nha_mang, $disabled_form);
 }
 
 function get_sim_products($afc_nha_mang, $phone_number) {
@@ -74,7 +75,7 @@ function get_sim_products($afc_nha_mang, $phone_number) {
             $sim = wc_get_product(get_the_ID());
             $sim_name = $sim->get_name();
             $phone_exists = $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM wp_esim_orders WHERE phone_number = %s AND status != -1 AND phone_number != %s",
+                "SELECT COUNT(*) FROM". $wpdb->prefix . "esim_orders WHERE phone_number = %s AND status != -1 AND phone_number != %s",
                 $sim_name,
                 $phone_number
             ));
@@ -169,9 +170,9 @@ function update_order($order_id, $data, $wpdb, $table_name) {
 }
 
 
-function display_order_form($order, $sim_products, $goi_cuoc_variations, $users, $afc_nha_mang) {
+function display_order_form($order, $sim_products, $goi_cuoc_variations, $users, $afc_nha_mang, $disabled_form) {
     $disabled = $order->status == 1;
-    $disabled_form = $order->order_data_id != NULL;
+    // $disabled_form = $order->order_data_id != NULL;
     $current_user = wp_get_current_user();
     ?>
     <div class="wrap">
@@ -193,6 +194,7 @@ function display_order_form($order, $sim_products, $goi_cuoc_variations, $users,
             <?php
             }
         ?>
+        <div id="message-box"></div>
         <form method="POST" action="" id="form_edit">
             <?php wp_nonce_field('create_order_nonce', 'checkout_nonce'); ?>
             <div style="display:flex;">
@@ -340,7 +342,7 @@ function display_order_form($order, $sim_products, $goi_cuoc_variations, $users,
                 var btn = $(this);
                 toggleLoading(btn, true);
                 e.preventDefault();
-
+                $("#message-box").html("");
                 let status = '<?php echo esc_js($order->status); ?>';
                 if (status == 1) {
                     let confirmMessage = "Sau khi tạo đơn hàng, bạn sẽ không thể chỉnh sửa thông tin của yêu cầu đặt mua này! Bạn chắc chắn muốn tạo đơn không?";
@@ -358,7 +360,7 @@ function display_order_form($order, $sim_products, $goi_cuoc_variations, $users,
                             goicuoc_price: '<?php echo esc_js($order->goicuoc_price); ?>',
                             sim_priceShip: '<?php echo esc_js($order->sim_priceShip); ?>',
                             channel: 'Esimdata',
-                            order_status: 'waiting_for_delivery',
+                            order_status: 0,
                             created_by: '<?php echo esc_js($current_user->user_email); ?>'
                         };
 
@@ -372,16 +374,16 @@ function display_order_form($order, $sim_products, $goi_cuoc_variations, $users,
                             },
                             success: function(response) {
                                 if(response.success) {
-                                    toggleLoading(btn, false);
-                                    alert(response.data.message); 
+                                    btn.remove();
+                                    $("#message-box").append(`<div class="notice notice-success"><p>${response.data.message}</p></div>`);
+
                                 } else {
                                     toggleLoading(btn, false);
-                                    alert("Error: " + response.data.message);
+                                    $("#message-box").append(`<div class="notice notice-error"><p>${response.data.message}</p></div>`);
                                 }
                             },
                             error: function(error) {
-                                alert("Có lỗi xảy ra!");
-                                console.error('Có lỗi xảy ra:', error);
+                                $("#message-box").append(`<div class="notice notice-error"><p>${response.data.message}</p></div>`);
                             }
                         });
                     } else {
