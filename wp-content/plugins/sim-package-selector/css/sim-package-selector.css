@@ -1,4 +1,14 @@
 /* Popup Styles */
+
+@media (max-width: 768px) {
+    .carousel-item {
+        display: none; /* Ẩn tất cả gói cước */
+    }
+    .carousel-item.active {
+        display: flex; /* Hiển thị gói cước đang hoạt động */
+    }
+}
+
 .package-item.selected {
     border: 2px solid #007bff; /* Màu sắc khi gói cước được chọn */
     background-color: #f0f8ff; /* Màu nền khi gói cước được chọn */
@@ -22,8 +32,11 @@
     padding: 20px;
     border-radius: 10px;
     width: 100%;
-    max-width: 1000px;
+    max-width: 1100px;
     position: relative;
+}
+.popup-content h2{
+    text-align: center;
 }
 
 #package-popup {
@@ -74,6 +87,20 @@
     text-align: left;
 }
 
+.carousel-item .d-flex{
+    justify-content: center;
+    align-items: center;
+}
+.package-item {
+    position: relative; 
+}
+
+.check-icon {
+    position: absolute; 
+    top: -1px; /* Khoảng cách từ trên cùng */
+    right: -1px; /* Khoảng cách từ bên phải */ 
+    display: none; 
+}
 
 
 .package-item {
@@ -103,13 +130,18 @@
 /* Carousel Control Styles */
 .carousel-control-prev,
 .carousel-control-next {
-    filter: invert(1); /* Đổi màu icon sang trắng */
-    background: none !important; /* Xóa nền khi hover    */
+    background: none !important; 
 }
 
 .carousel-control-prev:hover,
 .carousel-control-next:hover {
-    background: none !important; /* Xóa nền khi hover */
+    background: none !important; 
+}
+#package-carousel .carousel-control-prev,
+#package-carousel .carousel-control-next{
+    width: 50px;
+    height: 50px;
+    top: 50%;
 }
 
 .close-popup {

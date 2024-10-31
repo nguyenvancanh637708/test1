@@ -17,6 +17,11 @@ jQuery(document).ready(function($) {
                 $('#package-popup').fadeIn();
                 $('#package-popup').data('product-id', productId);
                 $('#package-popup').data('phone-number', phoneNumber);
+
+                // Kiểm tra kích thước màn hình
+                if ($(window).width() < 768) { // Nếu là mobile
+                    $('.carousel-item').slice(1).hide(); // Ẩn tất cả các gói cước ngoại trừ gói đầu tiên
+                }
             }
         });
     });
