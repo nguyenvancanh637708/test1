@@ -67,6 +67,7 @@ function create_esim_tables() {
         landing_id INT(20) NOT NULL,
         wp_order_id INT(20) DEFAULT NULL,  
         synced_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        action TEXT DEFAULT NOT NULL,
         status VARCHAR(50) NOT NULL,
         response TEXT DEFAULT NULL,
         PRIMARY KEY (id)
