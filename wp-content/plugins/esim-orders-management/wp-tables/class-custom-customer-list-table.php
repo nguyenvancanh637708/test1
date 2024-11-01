@@ -27,7 +27,7 @@ class Custom_Customer_List_Table extends WP_List_Table {
             'sales_channel'    => 'Kênh bán',
             'user_id'          => 'Nhân viên gọi',
             // 'note'             => 'Ghi chú',
-            'order_data_id'             => 'Đơn hàng',
+            // 'order_data_id'             => 'Đơn hàng',
             'status'           => 'Trạng thái',
         ];
     }
@@ -128,7 +128,7 @@ class Custom_Customer_List_Table extends WP_List_Table {
         foreach ($results as $row) {
             $status_display = $this->get_status_display($row['status']);
             $user_display = $this->get_user_display($row['user_id']);
-            $link = $this->get_link_esim_order_data($row['order_data_id']);
+            // $link = $this->get_link_esim_order_data($row['order_data_id']);
             $data[] = [
                 'id'                    => esc_html($row['id']),
                 'code_request'          => esc_html($row['code_request']),
@@ -143,7 +143,7 @@ class Custom_Customer_List_Table extends WP_List_Table {
                 'sales_channel'         => esc_html($row['sales_channel']),
                 'user_id'               => $user_display,
                 'note'                  => esc_html($row['note']),
-                'order_data_id'         => $link,
+                // 'order_data_id'         => $link,
                 'status'                => $status_display,
             ];
         }

@@ -33,11 +33,19 @@ function esim_api_keys_page() {
     
     // Lấy danh sách API keys
     // $api_keys = $wpdb->get_results("SELECT * FROM $table_name");
-    $api_keys = $wpdb->get_results("SELECT * FROM $table_name ORDER BY 
-    CASE 
-        WHEN status = 'active' THEN 0 
-        ELSE 1 
-    END");
+    $api_keys = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT * FROM $table_name 
+            ORDER BY 
+                CASE 
+                    WHEN status = 'active' THEN 0 
+                    ELSE 1 
+                END,
+                created_at DESC
+            LIMIT 20"
+        )
+    );
+    
 
 
     $default_date_time = (new DateTime())->modify('+7 days')->setTime(0, 0)->format('Y-m-d\TH:i');
@@ -72,7 +80,7 @@ function esim_api_keys_page() {
                         <td><?php echo esc_html($key->created_at); ?></td>
                         <td><?php echo esc_html($key->expires_at); ?></td>
                         <td>
-                            <span class="<?php echo esc_attr($key->status === 'active' ? 'baguette-active' : 'baguette-inactive'); ?>">
+                            <span class="baguette <?php echo esc_attr($key->status === 'active' ? 'baguette-active' : 'baguette-inactive'); ?>">
                                 <?php echo esc_html($key->status); ?>
                             </span>
                         </td>

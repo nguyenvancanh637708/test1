@@ -3,10 +3,53 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Register AJAX actions
-add_action('wp_ajax_create_order_data', 'create_order_handler');
-add_action('wp_ajax_nopriv_create_order_data', 'create_order_handler');
 
+
+add_action('wp_ajax_update_order_esim', 'update_order_esim_callback');
+add_action('wp_ajax_nopriv_update_order_esim', 'update_order_esim_callback'); // Nếu cần cho người dùng không đăng nhập
+
+function update_order_esim_callback() {
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'update_order_esim')) {
+        wp_send_json_error(['message' => 'Nonce không hợp lệ.']);
+        wp_die();
+    }
+
+    if (isset($_POST['orderData'])) {
+        global $wpdb; 
+        $order_data = $_POST['orderData'];
+        $order_id = intval($order_data['id']);
+        $created_date = sanitize_text_field($order_data['created_date']);
+        $payment_method = sanitize_text_field($order_data['payment_method']);
+        $order_status = sanitize_text_field($order_data['order_status']);
+
+        $updated = $wpdb->update(
+            $wpdb->prefix . 'esim_order_data', 
+            [
+                'created_date' => $created_date,
+                'payment_method' => $payment_method,
+                'status' => $order_status,
+            ],
+            ['id' => $order_id] 
+        );
+
+        if ($updated !== false) {
+            wp_send_json_success(['message' => 'Cập nhật thành công!']);
+        } else {
+            wp_send_json_error(['message' => 'Cập nhật không thành công.']);
+        }
+    } else {
+        wp_send_json_error(['message' => 'Dữ liệu không hợp lệ.']);
+    }
+
+    wp_die();
+}
+
+
+// Register AJAX actions
+// add_action('wp_ajax_create_order_data', 'create_order_handler');
+// add_action('wp_ajax_nopriv_create_order_data', 'create_order_handler');
+
+// đang không sử dụng chức năng tạo đơn hàng trên web mà chỉ lấy đơn hàng qua đồng bộ
 function create_order_handler() {
     // Verify nonce
     if (!check_ajax_referer('create_order_nonce', 'nonce', false)) {
@@ -81,46 +124,6 @@ function create_order_handler() {
 
     wp_die();
 }
-
-add_action('wp_ajax_update_order_esim', 'update_order_esim_callback');
-add_action('wp_ajax_nopriv_update_order_esim', 'update_order_esim_callback'); // Nếu cần cho người dùng không đăng nhập
-
-function update_order_esim_callback() {
-    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'update_order_esim')) {
-        wp_send_json_error(['message' => 'Nonce không hợp lệ.']);
-        wp_die();
-    }
-
-    if (isset($_POST['orderData'])) {
-        global $wpdb; 
-        $order_data = $_POST['orderData'];
-        $order_id = intval($order_data['id']);
-        $created_date = sanitize_text_field($order_data['created_date']);
-        $payment_method = sanitize_text_field($order_data['payment_method']);
-        $order_status = sanitize_text_field($order_data['order_status']);
-
-        $updated = $wpdb->update(
-            $wpdb->prefix . 'esim_order_data', 
-            [
-                'created_date' => $created_date,
-                'payment_method' => $payment_method,
-                'status' => $order_status,
-            ],
-            ['id' => $order_id] 
-        );
-
-        if ($updated !== false) {
-            wp_send_json_success(['message' => 'Cập nhật thành công!']);
-        } else {
-            wp_send_json_error(['message' => 'Cập nhật không thành công.']);
-        }
-    } else {
-        wp_send_json_error(['message' => 'Dữ liệu không hợp lệ.']);
-    }
-
-    wp_die();
-}
-
 
 
 

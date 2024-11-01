@@ -178,7 +178,7 @@ function display_order_form($order, $sim_products, $goi_cuoc_variations, $users,
     <div class="wrap">
         <h1 class="wp-heading-inline">Chỉnh sửa yêu cầu đặt SIM <strong>#<?php echo $order->code_request?></strong> </h1>
         <?php 
-            if ($order->status == 1) {
+            if (false) {
             ?>
                 <tr>
                     <td>
@@ -338,62 +338,62 @@ function display_order_form($order, $sim_products, $goi_cuoc_variations, $users,
                 $("#form_edit").find("input, select, textarea").prop("disabled", true);
             }
 
-            $('#btn-create_order').on('click', function(e) {
-                var btn = $(this);
-                toggleLoading(btn, true);
-                e.preventDefault();
-                $("#message-box").html("");
-                let status = '<?php echo esc_js($order->status); ?>';
-                if (status == 1) {
-                    let confirmMessage = "Sau khi tạo đơn hàng, bạn sẽ không thể chỉnh sửa thông tin của yêu cầu đặt mua này! Bạn chắc chắn muốn tạo đơn không?";
-                    if (confirm(confirmMessage)) { // If the user confirms
-                        let orderData = {
-                            order_id: '<?php echo esc_js($order->id); ?>',
-                            cus_phone: '<?php echo esc_js($order->customer_phone); ?>',
-                            cus_name: '<?php echo esc_js($order->customer_name); ?>',
-                            shipping_address: '<?php echo esc_js($order->customer_add); ?>',
-                            phone_number: '<?php echo esc_js($order->phone_number); ?>',
-                            package_name: '<?php echo esc_js($order->package_name); ?>',
-                            qty: 1,
-                            payment_method: '<?php echo esc_js($order->payment_method); ?>',
-                            sim_price: '<?php echo esc_js($order->sim_price); ?>',
-                            goicuoc_price: '<?php echo esc_js($order->goicuoc_price); ?>',
-                            sim_priceShip: '<?php echo esc_js($order->sim_priceShip); ?>',
-                            channel: 'Esimdata',
-                            order_status: 0,
-                            created_by: '<?php echo esc_js($current_user->user_email); ?>'
-                        };
+            // $('#btn-create_order').on('click', function(e) {
+            //     var btn = $(this);
+            //     toggleLoading(btn, true);
+            //     e.preventDefault();
+            //     $("#message-box").html("");
+            //     let status = '<?php echo esc_js($order->status); ?>';
+            //     if (status == 1) {
+            //         let confirmMessage = "Sau khi tạo đơn hàng, bạn sẽ không thể chỉnh sửa thông tin của yêu cầu đặt mua này! Bạn chắc chắn muốn tạo đơn không?";
+            //         if (confirm(confirmMessage)) { // If the user confirms
+            //             let orderData = {
+            //                 order_id: '<?php echo esc_js($order->id); ?>',
+            //                 cus_phone: '<?php echo esc_js($order->customer_phone); ?>',
+            //                 cus_name: '<?php echo esc_js($order->customer_name); ?>',
+            //                 shipping_address: '<?php echo esc_js($order->customer_add); ?>',
+            //                 phone_number: '<?php echo esc_js($order->phone_number); ?>',
+            //                 package_name: '<?php echo esc_js($order->package_name); ?>',
+            //                 qty: 1,
+            //                 payment_method: '<?php echo esc_js($order->payment_method); ?>',
+            //                 sim_price: '<?php echo esc_js($order->sim_price); ?>',
+            //                 goicuoc_price: '<?php echo esc_js($order->goicuoc_price); ?>',
+            //                 sim_priceShip: '<?php echo esc_js($order->sim_priceShip); ?>',
+            //                 channel: 'Esimdata',
+            //                 order_status: 0,
+            //                 created_by: '<?php echo esc_js($current_user->user_email); ?>'
+            //             };
 
-                        $.ajax({
-                            url: "<?php echo admin_url('admin-ajax.php'); ?>", 
-                            method: "POST",
-                            data: {
-                                action: 'create_order_data', 
-                                orderData: orderData,
-                                nonce: $("#checkout_nonce").val()
-                            },
-                            success: function(response) {
-                                if(response.success) {
-                                    btn.remove();
-                                    $("#message-box").append(`<div class="notice notice-success"><p>${response.data.message}</p></div>`);
+            //             $.ajax({
+            //                 url: "<?php echo admin_url('admin-ajax.php'); ?>", 
+            //                 method: "POST",
+            //                 data: {
+            //                     action: 'create_order_data', 
+            //                     orderData: orderData,
+            //                     nonce: $("#checkout_nonce").val()
+            //                 },
+            //                 success: function(response) {
+            //                     if(response.success) {
+            //                         btn.remove();
+            //                         $("#message-box").append(`<div class="notice notice-success"><p>${response.data.message}</p></div>`);
 
-                                } else {
-                                    toggleLoading(btn, false);
-                                    $("#message-box").append(`<div class="notice notice-error"><p>${response.data.message}</p></div>`);
-                                }
-                            },
-                            error: function(error) {
-                                $("#message-box").append(`<div class="notice notice-error"><p>${response.data.message}</p></div>`);
-                            }
-                        });
-                    } else {
-                        alert("Bạn đã hủy yêu cầu tạo đơn hàng.");
-                        toggleLoading(btn, false);
-                    }
-                } else {
-                    alert("Chỉ được tạo đơn khi yêu cầu được xử lý thành công!");
-                }
-            });
+            //                     } else {
+            //                         toggleLoading(btn, false);
+            //                         $("#message-box").append(`<div class="notice notice-error"><p>${response.data.message}</p></div>`);
+            //                     }
+            //                 },
+            //                 error: function(error) {
+            //                     $("#message-box").append(`<div class="notice notice-error"><p>${response.data.message}</p></div>`);
+            //                 }
+            //             });
+            //         } else {
+            //             alert("Bạn đã hủy yêu cầu tạo đơn hàng.");
+            //             toggleLoading(btn, false);
+            //         }
+            //     } else {
+            //         alert("Chỉ được tạo đơn khi yêu cầu được xử lý thành công!");
+            //     }
+            // });
         })(jQuery);
     </script>
 

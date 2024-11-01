@@ -73,15 +73,11 @@ function ds_don_hang_page() {
         echo "<option value=\"$value\" $selected>$label</option>";
     }
     echo '</select>';
-
-    // Add search input
     echo '<input type="text" name="s" value="' . (isset($_GET['s']) ? esc_attr($_GET['s']) : '') . '" placeholder="tìm tên, sđt KH">';
     echo '<input type="submit" class="button" value="Lọc">';
     echo '<a href="' . esc_url(admin_url('admin.php?page=ds-don-hang')) . '" class="button">Xóa lọc</a>';
     echo '</div>';
     echo '</form>';
-    
-    // Hiển thị bảng
     $orderListTable->display();
 
     echo '</div>';

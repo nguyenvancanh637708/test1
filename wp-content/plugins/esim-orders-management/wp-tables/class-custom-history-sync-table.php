@@ -113,7 +113,7 @@ class Custom_History_Sync_List_Table extends WP_List_Table {
             case 'status':
                 return $item['status']; 
             case 'response':
-                return sprintf('<button class="view-response" data-response="%s">Xem thêm</button>', esc_attr(json_encode($item['response'])));
+                return sprintf('<button class="view-response" data-response="%s">Xem chi tiết</button>', esc_attr(json_encode($item['response'])));
                 
             default:
                 return print_r($item, true); 
@@ -133,12 +133,14 @@ class Custom_History_Sync_List_Table extends WP_List_Table {
         $status_display = '';
         switch ($status) {
             case 'success': 
-                $status_display = '<span class="badge badge-success">Thành công</span>';
+                $status_display = '<span class="baguette baguette-active">Thành công</span>';
                 break;
-            case 'error': 
-                $status_display = '<span class="badge badge-danger">Thất bại</span>';
+            // case 'error': 
+            //     $status_display = '<span class="badge badge-danger">Thất bại</span>';
             default: 
-                $status_display = '<span class="badge badge-secondary">Không xác định</span>';
+                // $status_display = '<span class="badge badge-secondary">'.$status.'</span>';
+                $status_display = '<span class="baguette baguette-inactive">Thất bại</span>';
+
                 break;
         }
     
@@ -146,22 +148,31 @@ class Custom_History_Sync_List_Table extends WP_List_Table {
     }
 }
 
-// JavaScript để mở popup hiển thị nội dung JSON
+// Thêm JavaScript để mở popup hiển thị nội dung JSON
 add_action('admin_footer', 'esim_sync_history_popup_script');
 function esim_sync_history_popup_script() {
     ?>
+    <div class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <pre id="modal-json-content"></pre>
+        </div>
+    </div>
     <script type="text/javascript">
         jQuery(document).ready(function($) {
             $('.view-response').on('click', function() {
                 var responseData = $(this).data('response');
-
-                // Mở popup hiển thị nội dung JSON
-                var popupContent = '<pre>' + JSON.stringify(responseData, null, 2) + '</pre>'; // Chuyển đổi thành chuỗi JSON format
-                var popup = window.open('', 'Popup', 'width=600,height=400');
-                popup.document.write('<html><head><title>Xem Nội Dung</title></head><body>' + popupContent + '</body></html>');
-                popup.document.close();
+                $('#modal-json-content').text(JSON.stringify(responseData, null, 2));
+                $('.modal-overlay').fadeIn();
+            });
+            $('.modal-close, .modal-overlay').on('click', function() {
+                $('.modal-overlay').fadeOut();
+            });
+            $('.modal-content').on('click', function(event) {
+                event.stopPropagation();
             });
         });
     </script>
     <?php
 }
+

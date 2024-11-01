@@ -31,19 +31,22 @@ function esim_check_api_key($request) {
 }
 
 function esim_sync_orders($request) {
-    // Kiểm tra tính hợp lệ của API key
-    if (!esim_check_api_key($request)) {
-        log_sync_action('', '', 'Invalid API key', $request->get_json_params(), 'error');
-        return new WP_REST_Response(['error' => 'Invalid API key'], 403);
-    }
 
     // Lấy dữ liệu từ yêu cầu
     $data = $request->get_json_params();
+
+    // Kiểm tra tính hợp lệ của API key
+    if (!esim_check_api_key($request)) {
+        log_sync_action(null, null, 'error', $data, 'Invalid API key');
+        return new WP_REST_Response(['error' => 'Invalid API key'], 403);
+    }
+
+    
     
     // Lấy landing_id và kiểm tra tính hợp lệ
     $landing_id = isset($data['landing_id']) ? sanitize_text_field($data['landing_id']) : '';
     if (empty($landing_id)) {
-        log_sync_action($landing_id, null, 'Landing ID is required', $data, 'error');
+        log_sync_action($landing_id, null, 'error', $data, 'Landing ID is required');
         return new WP_REST_Response(['error' => 'Landing ID is required'], 400);
     }
 
@@ -66,19 +69,20 @@ function esim_sync_orders($request) {
             'phone_number' => sanitize_text_field($data['phone_number']),
             'package_name' => sanitize_text_field($data['package_name']),
             'payment_method' => sanitize_text_field($data['payment_method']),
-            'sim_price' => floatval($data['sim_price']),
-            'feeShip' => floatval($data['feeShip']),
-            'total_amount' => floatval($data['total_amount']),
+            'sim_price' => intval($data['sim_price']),
+            'feeShip' => intval($data['feeShip']),
+            'total_amount' => intval($data['total_amount']),
             'status' => sanitize_text_field($data['status']),
+            'serial_number' => sanitize_text_field($data['serial_number']),
         ];
 
         // Cập nhật bản ghi
         $updated = $wpdb->update($table_name, $update_data, ['landing_id' => $landing_id]);
         if ($updated !== false) {
-            log_sync_action($landing_id, $existing_record->id, 'success', $data, 'Cập nhật đơn hàng có ID: '.$existing_record->id); // Ghi log hành động
+            log_sync_action($landing_id, $existing_record->id, 'success', $data, 'updated'); // Ghi log hành động
             return new WP_REST_Response(['success' => true, 'message' => 'Record updated successfully'], 200);
         } else {
-            log_sync_action($landing_id, $existing_record->id, 'error', $data, 'Cập nhật đơn hàng có ID: '.$existing_record->id);
+            log_sync_action($landing_id, $existing_record->id, 'error', $data, 'update');
             return new WP_REST_Response(['error' => 'Failed to update record'], 500);
         }
     } else {
@@ -96,21 +100,22 @@ function esim_sync_orders($request) {
             'package_name' => sanitize_text_field($data['package_name']),
             'qty' => intval($data['qty']), // Chuyển đổi sang số nguyên
             'payment_method' => sanitize_text_field($data['payment_method']),
-            'sim_price' => floatval($data['sim_price']),
-            'feeShip' => floatval($data['feeShip']),
-            'total_amount' => floatval($data['total_amount']),
+            'sim_price' => intval($data['sim_price']),
+            'feeShip' => intval($data['feeShip']),
+            'total_amount' => intval($data['total_amount']),
             'status' => sanitize_text_field($data['status']),
             'created_by' => "API landing",
             'channel' => "landing",
+            'serial_number' => sanitize_text_field($data['serial_number']),
         ];
 
         $inserted = $wpdb->insert($table_name, $insert_data);
         if ($inserted) {
             $wp_order_id = $wpdb->insert_id; // Lấy ID của bản ghi mới
-            log_sync_action($landing_id, $wp_order_id, 'success', $data, 'Tạo mới đơn hàng có ID: '.$wp_order_id); // Ghi log hành động
+            log_sync_action($landing_id, $wp_order_id, 'success', $data, 'Created'); // Ghi log hành động
             return new WP_REST_Response(['success' => true, 'message' => 'Record added successfully'], 201);
         } else {
-            log_sync_action($landing_id, null, 'error', $data, 'Tạo mới đơn hàng có ID: '.$wp_order_id);
+            log_sync_action($landing_id, null, 'error', $data, 'Create');
             return new WP_REST_Response(['error' => 'Failed to add record'], 500);
         }
     }
@@ -125,7 +130,7 @@ function log_sync_action($landing_id, $wp_order_id, $status, $data, $action) {
     $json_data = json_encode($data);
 
     $wpdb->insert($log_table, [
-        'landing_id' => intval($landing_id),
+        'landing_id' => $landing_id ? intval($landing_id) : null,
         'wp_order_id' => $wp_order_id ? intval($wp_order_id) : null,
         'status' => sanitize_text_field($status),
         'response' => $json_data, // Lưu dữ liệu JSON

@@ -196,4 +196,5 @@ class Custom_Order_List_Table extends WP_List_Table {
             'total_amount'          => ['total_amount', false], 
         ];
     }
+    
 }
