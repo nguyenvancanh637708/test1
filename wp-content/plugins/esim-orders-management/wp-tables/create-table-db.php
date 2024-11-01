@@ -57,8 +57,10 @@ function create_esim_tables() {
         channel varchar(50) NOT NULL,
         status int(2) NOT NULL COMMENT '0: Chờ giao, 1: Thành công, 2: Thất bại, 3: Đã ship, 4:Đã nhận tiền',
         created_by varchar(255) DEFAULT 'API',
-        order_id int(20) NOT NULL COMMENT 'id của yêu cầu đặt mua',
+        -- order_id int(20) NOT NULL COMMENT 'id của yêu cầu đặt mua',
         landing_id int(20) NULL COMMENT 'id đơn hàng từ landing',
+        serial_number varchar(24) NULL,
+
         PRIMARY KEY (id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
 
