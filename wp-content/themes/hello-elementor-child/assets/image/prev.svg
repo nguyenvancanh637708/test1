@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none">
+    <rect x="0.5" y="0.5" width="39" height="39" rx="19.5" fill="#EFF1F8"></rect> <!-- Nền màu #EFF1F8 -->
+    <rect x="0.5" y="0.5" width="39" height="39" rx="19.5" stroke="#E3E5ED"></rect> <!-- Viền màu #E3E5ED -->
+    <path d="M15.828 20.5003H14.6209L15.4744 21.3539L20.4849 26.3643L19.778 27.0712L12.7071 20.0003L19.778 12.9294L20.4849 13.6363L15.4744 18.6468L14.6209 19.5003H15.828H27.5V20.5003H15.828Z" fill="#252731" stroke="#252731"></path> <!-- Mũi tên màu #252731 -->
+</svg>
