@@ -62,39 +62,7 @@
     margin-right: 20px; 
 }
 
-.pagination-links {
-    display: flex; 
-    align-items: center; 
-}
 
-.pagination-links a {
-    margin: 0 5px; 
-    padding: 6px 12px; 
-    border: 1px solid #0073aa; 
-    border-radius: 3px; 
-    text-decoration: none;
-    color: #0073aa; 
-    background-color: #f7f7f7;
-    transition: background-color 0.2s, color 0.2s; 
-}
-
-.pagination-links a:hover {
-    background-color: #0073aa; 
-    color: #fff;
-}
-
-.pagination-links span {
-    margin: 0 10px;
-    font-weight: normal;
-    color: #333;
-}
-
-.pagination-links a.current {
-    background-color: #0073aa; 
-    color: #fff; 
-    border-color: #0073aa; 
-    pointer-events: none;
-}
 
 
 
@@ -198,3 +166,39 @@
     font-size: 16px;
     color: #aaa;
 }
+
+.charts{
+    margin-top: 50px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    row-gap: 50px;
+}
+.charts .totalChart{
+    width: 100%;
+    padding-right: 30%;
+}
+.charts .revenueChart{
+    width: 70%;
+}
+.charts .legendChart{
+    width: 30%;
+}
+
+@media (max-width: 768px) {
+    .charts{
+        row-gap: 20px;
+    }
+    .charts .totalChart{
+        padding-right: 0%;
+    }
+    .charts .revenueChart{
+        width: 100%;
+    }
+    .charts .legendChart{
+        width: 50%;
+    }
+
+}
+

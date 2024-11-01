@@ -63,6 +63,9 @@ require_once plugin_dir_path(__FILE__) . 'wp-tables/class-custom-order-list-tabl
 require_once plugin_dir_path(__FILE__) . 'wp-tables/class-custom-customer-list-table.php';
 require_once plugin_dir_path(__FILE__) . 'wp-tables/class-custom-history-sync-table.php';
 
+
+require_once plugin_dir_path(__FILE__) . 'includes/dashboard.php';
+
 require_once plugin_dir_path(__FILE__) . 'includes/page-kh-dat-sim.php';
 require_once plugin_dir_path(__FILE__) . 'includes/page-edit-kh-dat-sim.php';
 require_once plugin_dir_path(__FILE__) . 'includes/ajax-handlers.php';
@@ -83,15 +86,24 @@ function my_custom_menu_page() {
         'QL ESIM',                           // Tên menu
         'QL ESIM',                           // Tiêu đề hiển thị trên trang admin
         'manage_options',                    // Quyền truy cập
-        'ds-kh-dat-sim',                    // Định danh menu (trỏ đến submenu đầu tiên)
-        'ds_kh_dat_sim_page',                // Hàm để hiển thị nội dung submenu
+        'esim-dashboard',                    // Định danh menu (trỏ đến submenu đầu tiên)
+        'esim_dashboard_page',                // Hàm để hiển thị nội dung submenu
         'dashicons-cart',                    // Biểu tượng menu
         2                                    // Vị trí trong menu
     );
-
-    // Tạo submenu "DS KH đặt sim"
+    // Tạo submenu "dashboard"
     add_submenu_page(
-        'ds-kh-dat-sim',                     // Định danh menu chính
+        'esim-dashboard',                     // Định danh menu chính
+        'Dashboard',                     // Tên submenu
+        'Dashboard',                     // Tiêu đề hiển thị trên trang admin
+        'manage_options',                     // Quyền truy cập
+        'esim-dashboard',                     // Định danh submenu
+        'esim_dashboard_page'                 // Hàm để hiển thị nội dung
+    );
+
+    // Tạo submenu "Dashboard"
+    add_submenu_page(
+        'esim-dashboard',                     // Định danh menu chính
         'DS KH đặt sim',                     // Tên submenu
         'DS KH đặt sim',                     // Tiêu đề hiển thị trên trang admin
         'manage_options',                     // Quyền truy cập
@@ -101,7 +113,7 @@ function my_custom_menu_page() {
 
     // Tạo submenu "DS đơn hàng"
     add_submenu_page(
-        'ds-kh-dat-sim',                     // Định danh menu chính
+        'esim-dashboard',                     // Định danh menu chính
         'DS đơn hàng',                       // Tên submenu
         'DS đơn hàng',                       // Tiêu đề hiển thị trên trang admin
         'manage_options',                     // Quyền truy cập
@@ -110,7 +122,7 @@ function my_custom_menu_page() {
     );
 
     add_submenu_page(
-        'ds-kh-dat-sim',                     // Định danh menu chính
+        'esim-dashboard',                     // Định danh menu chính
         'Chỉnh sửa khách hàng',              // Tên submenu
         'Chỉnh sửa KH',                         // Tiêu đề hiển thị trên trang admin
         'manage_options',                     // Quyền truy cập
@@ -118,7 +130,7 @@ function my_custom_menu_page() {
         'edit_kh_dat_sim_page'               // Hàm để hiển thị nội dung chỉnh sửa
     );
     add_submenu_page(
-        'ds-kh-dat-sim',                     // Định danh menu chính
+        'esim-dashboard',                     // Định danh menu chính
         'Chỉnh sửa đơn hàng',              // Tên submenu
         'Chỉnh sửa đơn hàng',                         // Tiêu đề hiển thị trên trang admin
         'manage_options',                     // Quyền truy cập
@@ -126,7 +138,7 @@ function my_custom_menu_page() {
         'edit_don_hang_page'               // Hàm để hiển thị nội dung chỉnh sửa
     );
     add_submenu_page(
-        'ds-kh-dat-sim',                     // Định danh menu chính
+        'esim-dashboard',                     // Định danh menu chính
         'Quản lý API KEY',              // Tên submenu
         'Quản lý API KEY',                         // Tiêu đề hiển thị trên trang admin
         'manage_options',      
@@ -135,7 +147,7 @@ function my_custom_menu_page() {
     );
 
     add_submenu_page(
-        'ds-kh-dat-sim',                     // Định danh menu chính
+        'esim-dashboard',                     // Định danh menu chính
         'Lịch sử đồng bộ',              // Tên submenu
         'Lịch sử đồng bộ',                         // Tiêu đề hiển thị trên trang admin
         'manage_options',      
