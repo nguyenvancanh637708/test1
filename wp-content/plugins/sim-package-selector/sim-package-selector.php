@@ -34,17 +34,17 @@ function sim_package_selector_popup_html()
         <div id="package-carousel" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner" id="carousel-items"></div>
             <button class="carousel-control-prev" type="button" data-bs-target="#package-carousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <img src="<?php echo get_stylesheet_directory_uri(); ?>/assets/image/prev.svg" alt="prev">
                 <span class="visually-hidden">Previous</span>
             </button>
             <button class="carousel-control-next" type="button" data-bs-target="#package-carousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <img src="<?php echo get_stylesheet_directory_uri(); ?>/assets/image/next.svg" alt="next">
                 <span class="visually-hidden">Next</span>
             </button>
         </div>
         <div class="payment-group">
-            <button class="button add-package">Thêm vào giỏ hàng</button>
-            <button class="button proceed-to-checkout">Tiến hành thanh toán</button>
+        <button class="button add-package">Thêm vào giỏ hàng</button>
+        <button class="button proceed-to-checkout">Tiến hành thanh toán</button>
         </div>
     </div>
 </div>
@@ -114,13 +114,14 @@ function get_packages_by_network()
                             $carousel_items .= '</div></div>'; // Kết thúc item carousel trước đó
                         }
                         $carousel_items .= '<div class="carousel-item ' . ($counter === 0 ? 'active' : '') . '">
-                            <div class="d-flex justify-content-around">'; // Sử dụng flexbox để sắp xếp gói cước
+                            <div class="d-flex">'; // Sử dụng flexbox để sắp xếp gói cước
                     }
 
                     $carousel_items .= '<div class="package-item" data-id="' . $variation_id . '">
                         <h5>Gói ' . $product->get_name() . ' </h5>
                         <h5>'  . $price . '/' . $variation_name . '</h5>
                         <p>' . wp_kses_post($description) . '</p>
+                        <img class="check-icon" src="' . get_stylesheet_directory_uri() . '/assets/image/check-checkout.svg" alt="check-checkout" style="display:none;">
                     </div>';
 
                     $counter++;

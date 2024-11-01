@@ -483,11 +483,11 @@ $query = new WP_Query($args);
         <div id="package-carousel" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner" id="carousel-items"></div>
             <button class="carousel-control-prev" type="button" data-bs-target="#package-carousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <img src="<?php echo get_stylesheet_directory_uri(); ?>/assets/image/prev.svg" alt="prev">
                 <span class="visually-hidden">Previous</span>
             </button>
             <button class="carousel-control-next" type="button" data-bs-target="#package-carousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <img src="<?php echo get_stylesheet_directory_uri(); ?>/assets/image/next.svg" alt="next">
                 <span class="visually-hidden">Next</span>
             </button>
         </div>
