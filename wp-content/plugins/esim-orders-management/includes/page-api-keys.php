@@ -76,7 +76,14 @@ function esim_api_keys_page() {
                 <?php foreach ($api_keys as $key) : ?>
                     <tr>
                         <td><?php echo esc_html($key->id); ?></td>
-                        <td><?php echo esc_html($key->api_key); ?></td>
+                        <td>
+                            <?php 
+                                echo esc_html($key->api_key); 
+                                if ($key->status === 'active') {
+                                    echo '<button class="copy-button" data-clipboard-text="' . esc_html($key->api_key) . '">Coppy</button>';
+                                }
+                            ?>
+                        </td>
                         <td><?php echo esc_html($key->created_at); ?></td>
                         <td><?php echo esc_html($key->expires_at); ?></td>
                         <td>
@@ -91,6 +98,32 @@ function esim_api_keys_page() {
             </tbody>
         </table>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const copyButtons = document.querySelectorAll('.copy-button');
+
+            copyButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Lấy văn bản từ thuộc tính data-clipboard-text
+                    const textToCopy = this.getAttribute('data-clipboard-text');
+
+                    // Tạo một textarea tạm thời để sao chép
+                    const textarea = document.createElement('textarea');
+                    textarea.value = textToCopy;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy'); // Thực hiện sao chép
+
+                    // Xóa textarea sau khi sao chép
+                    document.body.removeChild(textarea);
+
+                    // Tùy chọn: Hiển thị thông báo cho người dùng
+                    alert('Đã sao chép: ' + textToCopy);
+                });
+            });
+        });
+        </script>
+
     <?php
 }
 // Hàm tạo API key ngẫu nhiên

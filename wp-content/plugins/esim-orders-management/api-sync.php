@@ -31,7 +31,6 @@ function esim_check_api_key($request) {
 }
 
 function esim_sync_orders($request) {
-
     // Lấy dữ liệu từ yêu cầu
     $data = $request->get_json_params();
 
@@ -41,8 +40,6 @@ function esim_sync_orders($request) {
         return new WP_REST_Response(['error' => 'Invalid API key'], 403);
     }
 
-    
-    
     // Lấy landing_id và kiểm tra tính hợp lệ
     $landing_id = isset($data['landing_id']) ? sanitize_text_field($data['landing_id']) : '';
     if (empty($landing_id)) {
@@ -52,16 +49,14 @@ function esim_sync_orders($request) {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'esim_order_data';
-    $log_table = $wpdb->prefix . 'esim_order_data_sync'; // Bảng ghi log
+    $log_table = $wpdb->prefix . 'esim_order_data_sync'; 
 
-    // Kiểm tra xem có bản ghi nào với landing_id
     $existing_record = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE landing_id = %s", $landing_id));
 
-    // Nếu bản ghi tồn tại, cập nhật bản ghi
     if ($existing_record) {
         $update_data = [
             'ma_van_don' => sanitize_text_field($data['ma_van_don']),
-            'delivery_date' => sanitize_text_field($data['delivery_date']),
+            'delivery_date' => !empty($data['delivery_date']) ? sanitize_text_field($data['delivery_date']) : null,
             'cus_phone' => sanitize_text_field($data['cus_phone']),
             'cus_name' => sanitize_text_field($data['cus_name']),
             'shipping_address' => sanitize_text_field($data['shipping_address']),
@@ -91,14 +86,14 @@ function esim_sync_orders($request) {
             'landing_id' => $landing_id,
             'ma_van_don' => sanitize_text_field($data['ma_van_don']),
             'created_date' => sanitize_text_field($data['created_date']),
-            'delivery_date' => sanitize_text_field($data['delivery_date']),
+            'delivery_date' => !empty($data['delivery_date']) ? sanitize_text_field($data['delivery_date']) : null,
             'cus_phone' => sanitize_text_field($data['cus_phone']),
             'cus_name' => sanitize_text_field($data['cus_name']),
             'shipping_address' => sanitize_text_field($data['shipping_address']),
             'cus_type' => sanitize_text_field($data['cus_type']),
             'phone_number' => sanitize_text_field($data['phone_number']),
             'package_name' => sanitize_text_field($data['package_name']),
-            'qty' => intval($data['qty']), // Chuyển đổi sang số nguyên
+            'qty' => intval($data['qty']), 
             'payment_method' => sanitize_text_field($data['payment_method']),
             'sim_price' => intval($data['sim_price']),
             'feeShip' => intval($data['feeShip']),
@@ -111,7 +106,7 @@ function esim_sync_orders($request) {
 
         $inserted = $wpdb->insert($table_name, $insert_data);
         if ($inserted) {
-            $wp_order_id = $wpdb->insert_id; // Lấy ID của bản ghi mới
+            $wp_order_id = $wpdb->insert_id; 
             log_sync_action($landing_id, $wp_order_id, 'success', $data, 'Created'); // Ghi log hành động
             return new WP_REST_Response(['success' => true, 'message' => 'Record added successfully'], 201);
         } else {

@@ -61,6 +61,10 @@ function edit_don_hang_page() {
                 <td><?php echo esc_attr($order->channel);?></td>
             </tr>
             <tr>
+                <th><label for="shipping_address">Seri</label></th>
+                <td><?php echo esc_attr($order->serial_number);?></td>
+            </tr>
+            <tr>
                 <th><label for="customer_phone">SIM đặt</label></th>
                 <td class="name-item">
                     <?php 
@@ -76,8 +80,8 @@ function edit_don_hang_page() {
                 <td class="name-item">
                     <?php 
                         echo esc_html($order->package_name); 
-                        echo " | Giá: ";
-                        echo number_format($order->goicuoc_price, 0, ',', '.');
+                        // echo " | Giá: ";
+                        // echo number_format($order->goicuoc_price, 0, ',', '.');
                     ?>
                 </td>
             </tr>

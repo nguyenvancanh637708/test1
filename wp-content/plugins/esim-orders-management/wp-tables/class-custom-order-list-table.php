@@ -170,7 +170,8 @@ class Custom_Order_List_Table extends WP_List_Table {
         switch ($column_name) {
             case 'ma_van_don':
                 $order_detail_url = admin_url('admin.php?page=edit-don-hang&order_id=' . urlencode($item['id']));
-                return sprintf('<a href="%s" class="name-item">%s</a>', esc_url($order_detail_url), esc_html($item['ma_van_don']));
+                return sprintf('<a href="%s" class="name-item">#%s-%s</a>', esc_url($order_detail_url), esc_html($item['id']), esc_html($item['ma_van_don']));
+            
             case 'created_date':
             case 'delivery_date':
             case 'cus_phone':
