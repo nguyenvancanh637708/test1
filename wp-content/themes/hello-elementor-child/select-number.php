@@ -180,7 +180,7 @@ $query = new WP_Query($args);
 <div class="desktop-layout">
     <!-- Breakcrumd -->
     <div class="container">
-    <?php if (function_exists('rank_math_the_breadcrumbs')) rank_math_the_breadcrumbs(); ?>
+        <?php if (function_exists('rank_math_the_breadcrumbs')) rank_math_the_breadcrumbs(); ?>
     </div>
     <!-- Tiêu đề trang -->
     <div class="title-page">
@@ -364,116 +364,125 @@ $query = new WP_Query($args);
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-    const addToCartButtons = document.querySelectorAll('.chon-so-button');
+        const addToCartButtons = document.querySelectorAll('.chon-so-button');
 
-    addToCartButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            const productId = this.getAttribute('data-product-id');
-            const networkProvider = this.getAttribute('data-network-provider');
-            const phoneNumber = this.getAttribute('data-phone-number');
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const productId = this.getAttribute('data-product-id');
+                const networkProvider = this.getAttribute('data-network-provider');
+                const phoneNumber = this.getAttribute('data-phone-number');
 
-            // Gọi AJAX để lấy các gói cước có cùng nhà mạng
-            fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({
-                    'action': 'get_packages_by_network',
-                    'network_provider': networkProvider
-                })
-            })
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('carousel-items').innerHTML = data; // Cập nhật các item trong carousel
-                document.getElementById('package-popup').style.display = 'flex';
-                document.getElementById('package-popup').dataset.productId = productId;
-                document.getElementById('package-popup').dataset.phoneNumber = phoneNumber;
+                // Gọi AJAX để lấy các gói cước có cùng nhà mạng
+                fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({
+                            'action': 'get_packages_by_network',
+                            'network_provider': networkProvider
+                        })
+                    })
+                    .then(response => response.text())
+                    .then(data => {
+                        document.getElementById('carousel-items').innerHTML = data; // Cập nhật danh sách gói cước
+                        document.getElementById('package-popup').style.display = 'flex';
+                        document.getElementById('package-popup').dataset.productId = productId;
+                        document.getElementById('package-popup').dataset.phoneNumber = phoneNumber;
 
-                // Thêm sự kiện click cho từng gói cước
-                const packageItems = document.querySelectorAll('.package-item');
-                packageItems.forEach(item => {
-                    item.addEventListener('click', function() {
-                        // Xóa lớp active khỏi tất cả gói cước
-                        packageItems.forEach(i => i.classList.remove('active'));
-                        // Thêm lớp active cho gói cước được chọn
-                        this.classList.add('active');
+                        // Gán sự kiện click cho các gói cước
+                        addPackageClickEvent();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
                     });
-                });
-            })
-            .catch(error => {
-                console.error('Error:', error);
             });
         });
-    });
 
-    // Đóng popup
-    document.querySelector('.close-popup').addEventListener('click', function() {
-        document.getElementById('package-popup').style.display = 'none';
-    });
+        // Hàm gán sự kiện click cho gói cước
+        function addPackageClickEvent() {
+            const packageItems = document.querySelectorAll('.package-item');
+            packageItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Xóa lớp selected và ẩn icon cho tất cả gói cước
+                    packageItems.forEach(i => {
+                        i.classList.remove('selected');
+                        i.querySelector('.check-icon').style.display = 'none'; // Ẩn icon
+                    });
+                    // Thêm lớp selected cho gói cước được chọn
+                    this.classList.add('selected');
+                    this.querySelector('.check-icon').style.display = 'block'; // Hiện icon
+                });
+            });
+        }
 
-    // Thêm gói cước vào giỏ hàng
-    document.querySelector('.add-package').addEventListener('click', function() {
-        const selectedPackageId = document.querySelector('#carousel-items .carousel-item.active .package-item.active').dataset.id;
-        const productId = document.getElementById('package-popup').dataset.productId;
-        const phoneNumber = document.getElementById('package-popup').dataset.phoneNumber;
+        // Đóng popup
+        document.querySelector('.close-popup').addEventListener('click', function() {
+            document.getElementById('package-popup').style.display = 'none';
+        });
 
-        if (selectedPackageId) {
-            // Thêm gói cước vào giỏ hàng
-            fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({
-                    'action': 'add_to_cart',
-                    'product_id': selectedPackageId
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Thêm sản phẩm SIM vào giỏ hàng với số điện thoại
-                    fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+        // Thêm gói cước vào giỏ hàng
+        document.querySelector('.add-package').addEventListener('click', function() {
+            const selectedVariationId = document.querySelector('.package-item.selected')?.dataset.id;
+            const productId = document.getElementById('package-popup').dataset.productId;
+            const phoneNumber = document.getElementById('package-popup').dataset.phoneNumber;
+
+            if (selectedVariationId) {
+                // Thêm gói cước vào giỏ hàng
+                fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded'
                         },
                         body: new URLSearchParams({
                             'action': 'add_to_cart',
-                            'product_id': productId,
-                            'phone_number': phoneNumber
+                            'product_id': selectedVariationId
                         })
                     })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            alert('Gói cước và SIM đã được thêm vào giỏ hàng.');
-                            document.getElementById('package-popup').style.display = 'none';
-                            location.reload(); // Tải lại trang sau khi thêm thành công
+                            // Thêm sản phẩm SIM vào giỏ hàng với số điện thoại
+                            fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/x-www-form-urlencoded'
+                                    },
+                                    body: new URLSearchParams({
+                                        'action': 'add_to_cart',
+                                        'product_id': productId,
+                                        'phone_number': phoneNumber
+                                    })
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        alert('Gói cước và SIM đã được thêm vào giỏ hàng.');
+                                        document.getElementById('package-popup').style.display = 'none';
+                                        location.reload(); // Tải lại trang sau khi thêm thành công
+                                    } else {
+                                        alert('Có lỗi xảy ra khi thêm gói cước vào giỏ hàng.');
+                                    }
+                                });
                         } else {
                             alert('Có lỗi xảy ra khi thêm gói cước vào giỏ hàng.');
                         }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
                     });
-                } else {
-                    alert('Có lỗi xảy ra khi thêm gói cước vào giỏ hàng.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        } else {
-            alert('Vui lòng chọn một gói cước.');
-        }
-    });
+            } else {
+                alert('Vui lòng chọn một gói cước.');
+            }
+        });
 
-    document.getElementById('filter-fast').addEventListener('change', function() {
-        this.submit();
+        document.getElementById('filter-fast').addEventListener('change', function() {
+            this.submit();
+        });
     });
-});
-
 </script>
+
 
 <div id="package-popup" class="popup" style="display:none;">
     <div class="popup-overlay"></div>
@@ -483,17 +492,17 @@ $query = new WP_Query($args);
         <div id="package-carousel" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner" id="carousel-items"></div>
             <button class="carousel-control-prev" type="button" data-bs-target="#package-carousel" data-bs-slide="prev">
-            <img src="<?php echo get_stylesheet_directory_uri(); ?>/assets/image/prev.svg" alt="prev">
+                <img src="<?php echo get_stylesheet_directory_uri(); ?>/assets/image/prev.svg" alt="prev">
                 <span class="visually-hidden">Previous</span>
             </button>
             <button class="carousel-control-next" type="button" data-bs-target="#package-carousel" data-bs-slide="next">
-            <img src="<?php echo get_stylesheet_directory_uri(); ?>/assets/image/next.svg" alt="next">
+                <img src="<?php echo get_stylesheet_directory_uri(); ?>/assets/image/next.svg" alt="next">
                 <span class="visually-hidden">Next</span>
             </button>
         </div>
         <div class="payment-group">
-        <button class="button add-package">Thêm vào giỏ hàng</button>
-        <button class="button proceed-to-checkout">Tiến hành thanh toán</button>
+            <button class="button add-package">Thêm vào giỏ hàng</button>
+            <button class="button proceed-to-checkout">Tiến hành thanh toán</button>
         </div>
     </div>
 </div>
