@@ -1,3 +1,8 @@
+#toplevel_page_esim-dashboard .wp-submenu li:nth-last-child(1),
+#toplevel_page_esim-dashboard .wp-submenu li:nth-last-child(2){
+    display: none !important;
+}
+
 .btn-submit-cus{
     display: flex !important;
     align-items: center;

@@ -76,6 +76,9 @@ require_once plugin_dir_path(__FILE__) . 'includes/page-edit-don-hang.php';
 require_once plugin_dir_path(__FILE__) . 'includes/page-api-keys.php';
 require_once plugin_dir_path(__FILE__) . 'includes/page-history-sync.php';
 
+require_once plugin_dir_path(__FILE__) . 'revenue-report.php';
+require_once plugin_dir_path(__FILE__) . 'revenue-report-daily.php';
+
 
 
 
@@ -101,7 +104,7 @@ function my_custom_menu_page() {
         'esim_dashboard_page'                 // Hàm để hiển thị nội dung
     );
 
-    // Tạo submenu "Dashboard"
+    // Tạo submenu ""
     add_submenu_page(
         'esim-dashboard',                     // Định danh menu chính
         'DS KH đặt sim',                     // Tên submenu
@@ -121,22 +124,7 @@ function my_custom_menu_page() {
         'ds_don_hang_page'                  // Hàm để hiển thị nội dung submenu
     );
 
-    add_submenu_page(
-        'esim-dashboard',                     // Định danh menu chính
-        'Chỉnh sửa khách hàng',              // Tên submenu
-        'Chỉnh sửa KH',                         // Tiêu đề hiển thị trên trang admin
-        'manage_options',                     // Quyền truy cập
-        'edit-kh-dat-sim',                   // Định danh submenu
-        'edit_kh_dat_sim_page'               // Hàm để hiển thị nội dung chỉnh sửa
-    );
-    add_submenu_page(
-        'esim-dashboard',                     // Định danh menu chính
-        'Chỉnh sửa đơn hàng',              // Tên submenu
-        'Chỉnh sửa đơn hàng',                         // Tiêu đề hiển thị trên trang admin
-        'manage_options',                     // Quyền truy cập
-        'edit-don-hang',                   // Định danh submenu
-        'edit_don_hang_page'               // Hàm để hiển thị nội dung chỉnh sửa
-    );
+    
     add_submenu_page(
         'esim-dashboard',                     // Định danh menu chính
         'Quản lý API KEY',              // Tên submenu
@@ -153,6 +141,41 @@ function my_custom_menu_page() {
         'manage_options',      
         'history-sync',     // Slug menu
         'esim_sync_history_page' // Hàm gọi để hiển thị nội dung
+    );
+
+    add_submenu_page(
+        'esim-dashboard',
+        'Báo cáo doanh thu',
+        'Doanh thu theo tháng',
+        'manage_options',
+        'bao-cao-doanh-thu',
+        'render_revenue_report_page'
+    );
+
+    add_submenu_page(
+        'esim-dashboard',
+        'Báo cáo doanh thu theo ngày',
+        'Doanh thu theo ngày',
+        'manage_options',
+        'bao-cao-doanh-thu-theo-ngay',
+        'render_daily_revenue_report_page'
+    );
+
+    add_submenu_page(
+        'esim-dashboard',                     // Định danh menu chính
+        'Chỉnh sửa khách hàng',              // Tên submenu
+        'Chỉnh sửa KH',                         // Tiêu đề hiển thị trên trang admin
+        'manage_options',                     // Quyền truy cập
+        'edit-kh-dat-sim',                   // Định danh submenu
+        'edit_kh_dat_sim_page'               // Hàm để hiển thị nội dung chỉnh sửa
+    );
+    add_submenu_page(
+        'esim-dashboard',                     // Định danh menu chính
+        'Chỉnh sửa đơn hàng',              // Tên submenu
+        'Chỉnh sửa đơn hàng',                         // Tiêu đề hiển thị trên trang admin
+        'manage_options',                     // Quyền truy cập
+        'edit-don-hang',                   // Định danh submenu
+        'edit_don_hang_page'               // Hàm để hiển thị nội dung chỉnh sửa
     );
 }
 add_action('admin_menu', 'my_custom_menu_page');
