@@ -207,3 +207,35 @@
 
 }
 
+.filter-order {
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Space between label and dropdown */
+}
+
+#channel {
+    min-width: 150px;
+    max-width: 200px;
+    max-height: 80px; /* Limit the height */
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    overflow-y: auto; /* Adds scroll if options exceed height */
+}
+
+#channel option {
+    padding: 5px;
+}
+
+/* Style for placeholder option */
+#channel option[value=""] {
+    font-weight: bold;
+    color: #666;
+}
+
+#channel:focus {
+    border-color: #007cba;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}

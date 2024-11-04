@@ -6,55 +6,42 @@ function render_revenue_report_page() {
     $from_date = $_GET['from_date'] ?? '';
     $to_date = $_GET['to_date'] ?? '';
     $packages = isset($_GET['package']) && is_array($_GET['package'])
-    ? array_filter($_GET['package'], 'strlen') // Filters out empty strings
-    : array();
+        ? array_filter($_GET['package'], 'strlen') // Filters out empty strings
+        : [];
+    $channels = isset($_GET['channel']) && is_array($_GET['channel'])
+        ? array_filter($_GET['channel'], 'strlen') // Filters out empty strings
+        : [];
+
     $params = [];
 
-
-    // Tạo câu truy vấn SQL
+    // Construct SQL query
     $query = "SELECT package_name, DATE_FORMAT(delivery_date, '%m/%Y') AS month, COUNT(*) AS total_orders, SUM(total_amount) AS total_revenue 
               FROM $table_name WHERE 1=1";
 
-    // Điều kiện thời gian
+    // Date filter
     if ($from_date) {
         $query .= $wpdb->prepare(" AND delivery_date >= %s", $from_date . '-01');
     }
     if ($to_date) {
         $query .= $wpdb->prepare(" AND delivery_date <= %s", date("Y-m-t", strtotime($to_date . '-01')));
     }
+
+    // Package filter
     if (!empty($packages)) {
         $packages_placeholder = implode(',', array_fill(0, count($packages), '%s'));
         $query .= $wpdb->prepare(" AND package_name IN ($packages_placeholder)", $packages);
     }
-    
 
-
-    // Điều kiện lọc cho package_name
-    if (!empty($package_name)) {
-        $all_ids = [];
-        
-        foreach ($package_name as $parent_id) {
-            $all_ids[] = $parent_id;
-            $product = wc_get_product($parent_id);
-            if ($product && $product->is_type('variable')) {
-                $variation_ids = $product->get_children();
-                $all_ids = array_merge($all_ids, $variation_ids);
-            }
-        }
-
-        $all_ids = array_map('intval', array_unique($all_ids));
-
-        if ($all_ids) {
-            $placeholders = implode(',', array_fill(0, count($all_ids), '%d'));
-            $query .= " AND package_name IN ($placeholders)";
-            $params = array_merge($params, $all_ids);
-        }
+    // Channel filter
+    if (!empty($channels)) {
+        $channels_placeholder = implode(',', array_fill(0, count($channels), '%s'));
+        $query .= $wpdb->prepare(" AND channel IN ($channels_placeholder)", $channels);
     }
 
     $query .= " GROUP BY month, package_name ORDER BY month, package_name";
     $results = $wpdb->get_results($wpdb->prepare($query, $params));
 
-    // Tính tổng số lượng và doanh thu cho từng tháng
+    // Summarize data for each month
     $summary = [];
     foreach ($results as $result) {
         $month = $result->month;
@@ -70,17 +57,17 @@ function render_revenue_report_page() {
         $summary[$month]['items'][] = $result;
     }
 
-    // Xử lý xuất Excel
+    // Excel Export
     if (isset($_GET['export_excel'])) {
         header('Content-Type: application/vnd.ms-excel');
         header('Content-Disposition: attachment; filename="doanh_thu_theo_goi_cuoc.xls"');
         echo "Tháng\tLoại sim\tSố lượng bán\tDoanh thu BH\n";
 
         foreach ($summary as $month => $data) {
-            // Hàng tổng cho tháng
+            // Total row for each month
             echo "$month\tTổng\t{$data['total_orders']}\t" . number_format($data['total_revenue'], 0, ',', '.') . "\n";
             
-            // Các loại sim chi tiết cho từng tháng
+            // Detail rows for each package within the month
             foreach ($data['items'] as $item) {
                 echo "\t{$item->package_name}\t{$item->total_orders}\t" . number_format($item->total_revenue, 0, ',', '.') . "\n";
             }
@@ -115,13 +102,15 @@ function render_revenue_report_page() {
                         ?>
                     </select>
                 </div>
+                
                 <div class="alignleft actions filter-order">
-                    <select name="channel">
+                    <select name="channel[]" multiple>
                         <option value="">Kênh bán</option>
-                        <option <?php selected($_GET['channel'] ?? '', 'Esimdata'); ?> value="Esimdata">Esimdata</option>
-                        <option <?php selected($_GET['channel'] ?? '', 'Landing'); ?> value="Landing">Landing</option>
+                        <option <?php echo in_array('Esimdata', $_GET['channel'] ?? []) ? 'selected' : ''; ?> value="Esimdata">Esimdata</option>
+                        <option <?php echo in_array('Landing', $_GET['channel'] ?? []) ? 'selected' : ''; ?> value="Landing">Landing</option>
                     </select>
                 </div>
+                
                 <div class="alignleft actions">
                     <input type="submit" name="filter_action" id="order-query-submit" class="button" value="Tìm kiếm">
                     <input type="submit" name="export_excel" class="button" value="Xuất Excel">
@@ -140,7 +129,7 @@ function render_revenue_report_page() {
             <tbody>
                <?php 
                 foreach ($summary as $month => $data) {
-                    // Hiển thị tổng cho tháng
+                    // Display total for the month
                     echo '<tr style="font-weight: bold;">';
                     echo '<td>' . esc_html($month) . '</td>';
                     echo '<td>Tổng</td>';
@@ -148,10 +137,10 @@ function render_revenue_report_page() {
                     echo '<td>' . number_format($data['total_revenue'], 0, ',', '.') . ' VNĐ</td>';
                     echo '</tr>';
 
-                    // Hiển thị các loại sim cho tháng
+                    // Display each package type for the month
                     foreach ($data['items'] as $item) {
                         echo '<tr>';
-                        echo '<td></td>'; // ô trống cho cột tháng
+                        echo '<td></td>'; // Empty cell for month column
                         echo '<td>' . esc_html($item->package_name) . '</td>';
                         echo '<td>' . esc_html($item->total_orders) . '</td>';
                         echo '<td>' . number_format($item->total_revenue, 0, ',', '.') . ' VNĐ</td>';
