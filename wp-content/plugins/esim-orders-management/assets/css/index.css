@@ -29,10 +29,10 @@
     color: #0073aa !important;
 }
 .nav-filter{
-    margin-top: 20px;
+    /* margin-top: 20px; */
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 .nav-filter .select2.select2-container{
@@ -48,6 +48,9 @@
 .nav-filter .select2-container .select2-search--inline .select2-search__field{
     margin-top: 0;
 }
+/* .button_export{
+    margin-top: -18px;
+} */
 
 
 .tablenav.bottom {

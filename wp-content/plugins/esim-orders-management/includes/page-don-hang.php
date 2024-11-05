@@ -55,6 +55,9 @@ function ds_don_hang_page() {
     }
     echo '</select>';
 
+
+
+
     // Custom filter for order status
     $statuses = [
         '' => 'Tất cả trạng thái',
@@ -76,6 +79,23 @@ function ds_don_hang_page() {
     echo '<input type="text" name="s" value="' . (isset($_GET['s']) ? esc_attr($_GET['s']) : '') . '" placeholder="tìm tên, sđt KH">';
     echo '<input type="submit" class="button" value="Lọc">';
     echo '<a href="' . esc_url(admin_url('admin.php?page=ds-don-hang')) . '" class="button">Xóa lọc</a>';
+  // Form bộ lọc và nút xuất Excel
+    echo '<form method="GET" action="' . esc_url(admin_url('admin.php')) . '">';
+    echo '<div class="nav-filter">';
+    echo '<input type="hidden" name="page" value="ds-don-hang">';
+
+    // Các bộ lọc đã có sẵn của bạn ở đây (start_date, end_date, package_name...)
+    // Thêm nút "Xuất Excel"
+    // echo '<input type="submit" name="export_excel" class="button button_export" value="Xuất Excel">';
+    echo '<input type="submit" name="export_excel" class="button" value="Xuất execl">';
+    echo '</div>';
+    echo '</form>';
+
+    // Kiểm tra nếu người dùng bấm "Xuất Excel"
+    if (isset($_GET['export_excel'])) {
+        export_orders_to_excel($orderListTable->get_order_data());
+    }
+
     echo '</div>';
     echo '</form>';
     $orderListTable->display();
@@ -85,3 +105,62 @@ function ds_don_hang_page() {
 
 
 
+function export_orders_to_excel($orders) {
+    // Kiểm tra xem có dữ liệu để xuất không
+    if (empty($orders)) {
+        echo 'Không có dữ liệu để xuất.';
+        return;
+    }
+
+    // Đặt tên file xuất
+    $filename = "don_hang_" . date('Ymd_His') . ".csv";
+    
+    // Xóa bộ đệm đầu ra (nếu có) để đảm bảo không có bất kỳ nội dung nào được gửi trước
+    if (ob_get_length()) ob_end_clean();
+
+    // Thiết lập tiêu đề HTTP cho file CSV
+    header("Content-Description: File Transfer");
+    header("Content-Disposition: attachment; filename={$filename}");
+    header("Content-Type: text/csv; charset=UTF-8");
+    header('Pragma: public');
+    header('Expires: 0');
+    
+    // Mở output để ghi vào file CSV
+    $output = fopen("php://output", "w");
+
+    // Output a BOM (Byte Order Mark) for UTF-8
+    fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+
+    // Ghi dòng tiêu đề cho file CSV (các trường trong đơn hàng)
+    fputcsv($output, ['Mã vận đơn', 'Ngày tạo đơn', 'Ngày giao', 'SĐT KH', 'Tên KH', 'Sim đặt', 'Loại sim', 'Số lượng', 'Tổng tiền', 'Kênh bán', 'Trạng thái']);
+
+    // Ghi dữ liệu từng đơn hàng vào CSV
+    foreach ($orders as $order) {
+        fputcsv($output, [
+            $order['ma_van_don'],
+            $order['created_date'],
+            $order['delivery_date'],
+            $order['cus_phone'],
+            $order['cus_name'],
+            $order['phone_number'],
+            $order['package_name'],
+            $order['qty'],
+            str_replace(',', '', $order['total_amount']), // Chuyển đổi định dạng tiền tệ
+            $order['channel'],
+            strip_tags($order['status']) // Loại bỏ thẻ HTML trong trạng thái
+        ]);
+    }
+
+    // Đóng output và dừng thực thi để tải file về
+    fclose($output);
+    exit();
+}
+
+// Thêm vào chỗ gọi hàm xuất
+if (isset($_GET['export_csv'])) {
+    // Lấy dữ liệu đơn hàng từ bảng
+    $orders = $orderListTable->get_order_data(); // Đảm bảo bạn gọi đúng phương thức lấy dữ liệu
+
+    // Gọi hàm xuất
+    export_orders_to_excel($orders);
+}

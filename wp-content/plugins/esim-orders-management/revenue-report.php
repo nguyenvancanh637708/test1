@@ -12,8 +12,6 @@ function render_revenue_report_page() {
         ? array_filter($_GET['channel'], 'strlen') // Filters out empty strings
         : [];
 
-    $params = [];
-
     // Construct SQL query
     $query = "SELECT package_name, DATE_FORMAT(delivery_date, '%m/%Y') AS month, COUNT(*) AS total_orders, SUM(total_amount) AS total_revenue 
               FROM $table_name WHERE 1=1";
@@ -39,7 +37,7 @@ function render_revenue_report_page() {
     }
 
     $query .= " GROUP BY month, package_name ORDER BY month, package_name";
-    $results = $wpdb->get_results($wpdb->prepare($query, $params));
+    $results = $wpdb->get_results($query);
 
     // Summarize data for each month
     $summary = [];
@@ -57,23 +55,50 @@ function render_revenue_report_page() {
         $summary[$month]['items'][] = $result;
     }
 
-    // Excel Export
-    if (isset($_GET['export_excel'])) {
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment; filename="doanh_thu_theo_goi_cuoc.xls"');
-        echo "Tháng\tLoại sim\tSố lượng bán\tDoanh thu BH\n";
+    // CSV Export
+    if (isset($_GET['export_csv'])) {
+        // Prevent any output before setting headers
+        if (ob_get_length()) ob_end_clean(); // Clean the output buffer if there's any output
 
+        // Set headers for CSV file download
+        header('Content-Type: text/csv; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="bao_cao_doanh_thu_thang' . date('Y-m-d') . '.csv"');
+
+        // Open output stream for writing
+        $output = fopen('php://output', 'w');
+
+        // Output a BOM (Byte Order Mark) for UTF-8
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+
+        // Set column headers with formatting to indicate separation
+        fputcsv($output, ['STT', 'Tháng', 'Loại sim', 'Số lượng bán', 'Doanh thu BH']);
+
+        $stt = 1; // Initialize counter for STT
         foreach ($summary as $month => $data) {
-            // Total row for each month
-            echo "$month\tTổng\t{$data['total_orders']}\t" . number_format($data['total_revenue'], 0, ',', '.') . "\n";
-            
-            // Detail rows for each package within the month
+            // Add total row for the month
+            fputcsv($output, [
+                $stt++,
+                $month,
+                'Tổng',
+                $data['total_orders'],
+                number_format($data['total_revenue'], 0, ',', '.') . ' VNĐ'
+            ]);
+
+            // Add each package type for the month
             foreach ($data['items'] as $item) {
-                echo "\t{$item->package_name}\t{$item->total_orders}\t" . number_format($item->total_revenue, 0, ',', '.') . "\n";
+                fputcsv($output, [
+                    '',
+                    '',
+                    $item->package_name,
+                    $item->total_orders,
+                    number_format($item->total_revenue, 0, ',', '.') . ' VNĐ'
+                ]);
             }
         }
 
-        exit;
+        // Close output stream
+        fclose($output);
+        exit(); // Stop script execution
     }
 
     ?>
@@ -104,7 +129,7 @@ function render_revenue_report_page() {
                 </div>
                 
                 <div class="alignleft actions filter-order">
-                    <select name="channel[]" multiple>
+                    <select name="channel[]">
                         <option value="">Kênh bán</option>
                         <option <?php echo in_array('Esimdata', $_GET['channel'] ?? []) ? 'selected' : ''; ?> value="Esimdata">Esimdata</option>
                         <option <?php echo in_array('Landing', $_GET['channel'] ?? []) ? 'selected' : ''; ?> value="Landing">Landing</option>
@@ -113,7 +138,7 @@ function render_revenue_report_page() {
                 
                 <div class="alignleft actions">
                     <input type="submit" name="filter_action" id="order-query-submit" class="button" value="Tìm kiếm">
-                    <input type="submit" name="export_excel" class="button" value="Xuất Excel">
+                    <input type="submit" name="export_csv" class="button" value="Xuất CSV">
                 </div>
             </div>
         </form>

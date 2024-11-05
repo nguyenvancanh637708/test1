@@ -62,36 +62,41 @@ function render_daily_revenue_report_page() {
 
     // Kiểm tra xem có yêu cầu xuất CSV không
     if (isset($_GET['export_csv'])) {
-        // Đặt header cho file CSV
-        header('Content-Type: text/csv; charset=utf-8');
+        // Prevent any output before setting headers
+        if (ob_get_length()) ob_end_clean(); // Clean the output buffer if there's any output
+    
+        // Set headers for CSV file download
+        header('Content-Type: text/csv; charset=UTF-8');
         header('Content-Disposition: attachment; filename="bao_cao_doanh_thu_' . date('Y-m-d') . '.csv"');
-        
-        // Mở file output cho ghi
+    
+        // Open output stream for writing
         $output = fopen('php://output', 'w');
-
-        // // Thêm BOM vào đầu file CSV để Excel nhận diện đúng mã hóa
-        // fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-
-        // Đặt tiêu đề cho các cột
+    
+        // Output a BOM (Byte Order Mark) for UTF-8
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+    
+        // Set column headers with formatting to indicate separation
         fputcsv($output, ['STT', 'Ngày giao', 'Loại sim', 'Doanh thu BH']);
-
-        $stt = 1;
+    
+        $stt = 1; // Initialize counter for STT
         foreach ($summary as $order_date => $data) {
             foreach ($data['packages'] as $package_name => $package_data) {
+                // Format revenue to VNĐ and add row to CSV
                 fputcsv($output, [
-                    $stt++,
+                    $stt++, // Increment STT
                     $order_date,
                     $package_name,
                     number_format($package_data['total_revenue'], 0, ',', '.') . ' VNĐ'
                 ]);
             }
         }
-
-        // Tổng doanh thu
+    
+        // Add total revenue row with clear indication
         fputcsv($output, ['Tổng', '', '', number_format($grand_total_revenue, 0, ',', '.') . ' VNĐ']);
-
+    
+        // Close output stream
         fclose($output);
-        exit(); // Dừng thực thi script
+        exit(); // Stop script execution
     }
 
     // Hiển thị HTML nếu không xuất CSV
@@ -122,7 +127,7 @@ function render_daily_revenue_report_page() {
                     </select>
                 </div>
                 <div class="alignleft actions filter-order">
-                    <select name="channel[]" multiple>
+                    <select name="channel[]">
                         <option value="">Kênh bán</option>
                         <option <?php echo in_array('Esimdata', $_GET['channel'] ?? []) ? 'selected' : ''; ?> value="Esimdata">Esimdata</option>
                         <option <?php echo in_array('Landing', $_GET['channel'] ?? []) ? 'selected' : ''; ?> value="Landing">Landing</option>
